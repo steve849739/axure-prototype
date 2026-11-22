@@ -16,7 +16,7 @@
   position:absolute;
   z-index:0;
 }
-#u5874_div {
+#u1600_div {
   border-width:0px;
   position:absolute;
   left:0px;
@@ -34,7 +34,7 @@
   color:#000000;
   line-height:28px;
 }
-#u5874 {
+#u1600 {
   border-width:0px;
   position:absolute;
   left:39px;
@@ -46,14 +46,14 @@
   color:#000000;
   line-height:28px;
 }
-#u5874 .text {
+#u1600 .text {
   position:absolute;
   align-self:flex-start;
   padding:0px 0px 0px 0px;
   box-sizing:border-box;
   width:100%;
 }
-#u5874_text {
+#u1600_text {
   border-width:0px;
   word-wrap:break-word;
   text-transform:none;
