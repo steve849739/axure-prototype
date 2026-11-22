@@ -1,0 +1,1325 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <title>小程序微信静默登录和引导绑定手机（版本待定）</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <link href="resources/css/axure_rp_page.css" type="text/css" rel="stylesheet"/>
+    <link href="data/styles.css" type="text/css" rel="stylesheet"/>
+    <link href="files/小程序微信静默登录和引导绑定手机（版本待定）/styles.css" type="text/css" rel="stylesheet"/>
+    <script src="resources/scripts/jquery-3.2.1.min.js"></script>
+    <script src="resources/scripts/axure/axQuery.js"></script>
+    <script src="resources/scripts/axure/globals.js"></script>
+    <script src="resources/scripts/axutils.js"></script>
+    <script src="resources/scripts/axure/annotation.js"></script>
+    <script src="resources/scripts/axure/axQuery.std.js"></script>
+    <script src="resources/scripts/axure/doc.js"></script>
+    <script src="resources/scripts/messagecenter.js"></script>
+    <script src="resources/scripts/axure/events.js"></script>
+    <script src="resources/scripts/axure/recording.js"></script>
+    <script src="resources/scripts/axure/action.js"></script>
+    <script src="resources/scripts/axure/expr.js"></script>
+    <script src="resources/scripts/axure/geometry.js"></script>
+    <script src="resources/scripts/axure/flyout.js"></script>
+    <script src="resources/scripts/axure/model.js"></script>
+    <script src="resources/scripts/axure/repeater.js"></script>
+    <script src="resources/scripts/axure/sto.js"></script>
+    <script src="resources/scripts/axure/utils.temp.js"></script>
+    <script src="resources/scripts/axure/variables.js"></script>
+    <script src="resources/scripts/axure/drag.js"></script>
+    <script src="resources/scripts/axure/move.js"></script>
+    <script src="resources/scripts/axure/visibility.js"></script>
+    <script src="resources/scripts/axure/style.js"></script>
+    <script src="resources/scripts/axure/adaptive.js"></script>
+    <script src="resources/scripts/axure/tree.js"></script>
+    <script src="resources/scripts/axure/init.temp.js"></script>
+    <script src="resources/scripts/axure/legacy.js"></script>
+    <script src="resources/scripts/axure/viewer.js"></script>
+    <script src="resources/scripts/axure/math.js"></script>
+    <script src="resources/scripts/axure/jquery.nicescroll.min.js"></script>
+    <script src="data/document.js"></script>
+    <script src="files/小程序微信静默登录和引导绑定手机（版本待定）/data.js"></script>
+    <script type="text/javascript">
+      $axure.utils.getTransparentGifPath = function() { return 'resources/images/transparent.gif'; };
+      $axure.utils.getOtherPath = function() { return 'resources/Other.html'; };
+      $axure.utils.getReloadPath = function() { return 'resources/reload.html'; };
+    </script>
+  </head>
+  <body>
+    <div id="base" class="">
+
+      <!-- Unnamed (Image) -->
+      <div id="u6348" class="ax_default image">
+        <img id="u6348_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6348.png"/>
+        <div id="u6348_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6349" class="ax_default paragraph">
+        <div id="u6349_div" class=""></div>
+        <div id="u6349_text" class="text ">
+          <p><span style="text-decoration:none;">点击绑定</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6350" class="ax_default heading_1">
+        <div id="u6350_div" class=""></div>
+        <div id="u6350_text" class="text ">
+          <p><span style="text-decoration:none;">I 小程序支持微信静默登录和引导绑定手机</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6351" class="ax_default box_3">
+        <div id="u6351_div" class=""></div>
+        <div id="u6351_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6352" class="ax_default heading_2">
+        <div id="u6352_div" class=""></div>
+        <div id="u6352_text" class="text ">
+          <p><span style="text-decoration:none;">一、小程序增加跳过已有登录流程，实现静默登录</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6353" class="ax_default image">
+        <img id="u6353_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6353.png"/>
+        <div id="u6353_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Shape) -->
+      <div id="u6354" class="ax_default line">
+        <img id="u6354_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6354.svg"/>
+        <div id="u6354_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6355" class="ax_default paragraph">
+        <div id="u6355_div" class=""></div>
+        <div id="u6355_text" class="text ">
+          <p><span style="text-decoration:none;">自动填入</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6356" class="ax_default paragraph">
+        <div id="u6356_div" class=""></div>
+        <div id="u6356_text" class="text ">
+          <p><span style="text-decoration:none;">1、新增点击获取微信绑定的手机填入</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6357" class="ax_default box_1">
+        <div id="u6357_div" class=""></div>
+        <div id="u6357_text" class="text ">
+          <p><span style="text-decoration:none;">获取unionid1</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6358" class="ax_default box_1">
+        <div id="u6358_div" class=""></div>
+        <div id="u6358_text" class="text ">
+          <p><span style="text-decoration:none;">查询unionid1 </span></p><p><span style="text-decoration:none;">的ssj账号</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Diamond) -->
+      <div id="u6359" class="ax_default box_1">
+        <img id="u6359_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6359.svg"/>
+        <div id="u6359_text" class="text ">
+          <p><span style="text-decoration:none;">当前unionid1</span></p><p><span style="text-decoration:none;">是否有ssj账号？</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6360" class="ax_default box_1">
+        <div id="u6360_div" class=""></div>
+        <div id="u6360_text" class="text ">
+          <p><span style="text-decoration:none;">返回ssj账号信息</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6361" class="ax_default box_1">
+        <div id="u6361_div" class=""></div>
+        <div id="u6361_text" class="text ">
+          <p><span style="text-decoration:none;">登录成功</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6362" class="ax_default box_1">
+        <div id="u6362_div" class=""></div>
+        <div id="u6362_text" class="text ">
+          <p><span style="text-decoration:none;">创建随手记账号<br>ssj2</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6363" class="ax_default connector">
+        <img id="u6363_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6363_seg0.svg" alt="u6363_seg0"/>
+        <img id="u6363_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6363_seg1.svg" alt="u6363_seg1"/>
+        <img id="u6363_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6363_seg2.svg" alt="u6363_seg2"/>
+        <div id="u6363_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6364" class="ax_default connector">
+        <img id="u6364_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6364_seg0.svg" alt="u6364_seg0"/>
+        <img id="u6364_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6364_seg1.svg" alt="u6364_seg1"/>
+        <img id="u6364_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6364_seg2.svg" alt="u6364_seg2"/>
+        <div id="u6364_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6365" class="ax_default connector">
+        <img id="u6365_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6365_seg0.svg" alt="u6365_seg0"/>
+        <img id="u6365_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6365_seg1.svg" alt="u6365_seg1"/>
+        <img id="u6365_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6365_seg2.svg" alt="u6365_seg2"/>
+        <img id="u6365_seg3" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6365_seg3.svg" alt="u6365_seg3"/>
+        <div id="u6365_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6366" class="ax_default connector">
+        <img id="u6366_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6366_seg0.svg" alt="u6366_seg0"/>
+        <img id="u6366_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6366_seg1.svg" alt="u6366_seg1"/>
+        <img id="u6366_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6366_seg2.svg" alt="u6366_seg2"/>
+        <div id="u6366_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6367" class="ax_default connector">
+        <img id="u6367_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6367_seg0.svg" alt="u6367_seg0"/>
+        <img id="u6367_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6367_seg1.svg" alt="u6367_seg1"/>
+        <img id="u6367_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6367_seg2.svg" alt="u6367_seg2"/>
+        <div id="u6367_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6368" class="ax_default box_1">
+        <div id="u6368_div" class=""></div>
+        <div id="u6368_text" class="text ">
+          <p><span style="text-decoration:none;">绑定ssj2、unionid1</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6369" class="ax_default connector">
+        <img id="u6369_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6369_seg0.svg" alt="u6369_seg0"/>
+        <img id="u6369_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6369_seg1.svg" alt="u6369_seg1"/>
+        <img id="u6369_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6369_seg2.svg" alt="u6369_seg2"/>
+        <div id="u6369_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6370" class="ax_default connector">
+        <img id="u6370_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6370_seg0.svg" alt="u6370_seg0"/>
+        <img id="u6370_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6370_seg1.svg" alt="u6370_seg1"/>
+        <img id="u6370_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6370_seg2.svg" alt="u6370_seg2"/>
+        <img id="u6370_seg3" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6370_seg3.svg" alt="u6370_seg3"/>
+        <div id="u6370_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Group) -->
+      <div id="u6371" class="ax_default" data-left="94" data-top="1390" data-width="120" data-height="57">
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6372" class="ax_default box_1">
+          <div id="u6372_div" class=""></div>
+          <div id="u6372_text" class="text " style="display:none; visibility: hidden">
+            <p></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6373" class="ax_default box_1">
+          <div id="u6373_div" class=""></div>
+          <div id="u6373_text" class="text ">
+            <p><span style="text-decoration:none;">绑定手机</span></p><p><span style="text-decoration:none;">子流程</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6374" class="ax_default connector">
+        <img id="u6374_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6374_seg0.svg" alt="u6374_seg0"/>
+        <img id="u6374_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6374_seg1.svg" alt="u6374_seg1"/>
+        <img id="u6374_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6374_seg2.svg" alt="u6374_seg2"/>
+        <div id="u6374_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6375" class="ax_default paragraph">
+        <div id="u6375_div" class=""></div>
+        <div id="u6375_text" class="text ">
+          <p><span style="text-decoration:none;">2、绑定流程中，手机号已被占用的情况，提示去App换绑</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6376" class="ax_default box_1">
+        <div id="u6376_div" class=""></div>
+        <div id="u6376_text" class="text ">
+          <p><span style="text-decoration:none;">开始</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6377" class="ax_default connector">
+        <img id="u6377_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6377_seg0.svg" alt="u6377_seg0"/>
+        <img id="u6377_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6377_seg1.svg" alt="u6377_seg1"/>
+        <img id="u6377_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6377_seg2.svg" alt="u6377_seg2"/>
+        <div id="u6377_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6378" class="ax_default box_1">
+        <div id="u6378_div" class=""></div>
+        <div id="u6378_text" class="text ">
+          <p><span style="text-decoration:none;">结束</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6379" class="ax_default connector">
+        <img id="u6379_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6379_seg0.svg" alt="u6379_seg0"/>
+        <img id="u6379_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6379_seg1.svg" alt="u6379_seg1"/>
+        <img id="u6379_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6379_seg2.svg" alt="u6379_seg2"/>
+        <div id="u6379_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6380" class="ax_default heading_2">
+        <div id="u6380_div" class=""></div>
+        <div id="u6380_text" class="text ">
+          <p><span style="text-decoration:none;">二、引导绑定手机</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6381" class="ax_default heading_2">
+        <div id="u6381_div" class=""></div>
+        <div id="u6381_text" class="text ">
+          <p><span style="text-decoration:none;">场景1：记一笔点击保存</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6382" class="ax_default paragraph">
+        <div id="u6382_div" class=""></div>
+        <div id="u6382_text" class="text ">
+          <p><span style="text-decoration:none;">1、目前小程序记一笔保存时会校验是否绑定手机，流水总数不超过20笔时，该步骤支持跳过， 大于等于20笔时，不支持跳过</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6383" class="ax_default image">
+        <img id="u6383_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6383.png"/>
+        <div id="u6383_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6384" class="ax_default image">
+        <img id="u6384_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6384.jpg"/>
+        <div id="u6384_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6385" class="ax_default box_1">
+        <div id="u6385_div" class=""></div>
+        <div id="u6385_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6386" class="ax_default heading_2">
+        <div id="u6386_div" class=""></div>
+        <div id="u6386_text" class="text ">
+          <p><span style="text-decoration:none;">组件化账本</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Group) -->
+      <div id="u6387" class="ax_default" data-left="376" data-top="3953" data-width="83" data-height="31">
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6388" class="ax_default box_1">
+          <div id="u6388_div" class=""></div>
+          <div id="u6388_text" class="text " style="display:none; visibility: hidden">
+            <p></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Line) -->
+        <div id="u6389" class="ax_default line">
+          <img id="u6389_img" class="img " src="images/分类和账户增删改/u20.svg"/>
+          <div id="u6389_text" class="text " style="display:none; visibility: hidden">
+            <p></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Group) -->
+        <div id="u6390" class="ax_default" data-left="430" data-top="3959" data-width="18" data-height="18">
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6391" class="ax_default box_3">
+            <div id="u6391_div" class=""></div>
+            <div id="u6391_text" class="text " style="display:none; visibility: hidden">
+              <p></p>
+            </div>
+          </div>
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6392" class="ax_default box_3">
+            <div id="u6392_div" class=""></div>
+            <div id="u6392_text" class="text " style="display:none; visibility: hidden">
+              <p></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Unnamed (Group) -->
+        <div id="u6393" class="ax_default" data-left="389" data-top="3965" data-width="18" data-height="6">
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6394" class="ax_default box_3">
+            <div id="u6394_div" class=""></div>
+            <div id="u6394_text" class="text " style="display:none; visibility: hidden">
+              <p></p>
+            </div>
+          </div>
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6395" class="ax_default box_3">
+            <div id="u6395_div" class=""></div>
+            <div id="u6395_text" class="text " style="display:none; visibility: hidden">
+              <p></p>
+            </div>
+          </div>
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6396" class="ax_default box_3">
+            <div id="u6396_div" class=""></div>
+            <div id="u6396_text" class="text " style="display:none; visibility: hidden">
+              <p></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6397" class="ax_default image">
+        <img id="u6397_img" class="img " src="images/分类和账户增删改/u95.png"/>
+        <div id="u6397_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Shape) -->
+      <div id="u6398" class="ax_default shape1">
+        <img id="u6398_img" class="img " src="images/分类和账户增删改/u28.svg"/>
+        <div id="u6398_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6399" class="ax_default connector">
+        <img id="u6399_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6399_seg0.svg" alt="u6399_seg0"/>
+        <img id="u6399_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6399_seg1.svg" alt="u6399_seg1"/>
+        <img id="u6399_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6399_seg2.svg" alt="u6399_seg2"/>
+        <img id="u6399_seg3" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6399_seg3.svg" alt="u6399_seg3"/>
+        <img id="u6399_seg4" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6399_seg4.svg" alt="u6399_seg4"/>
+        <div id="u6399_text" class="text ">
+          <p><span style="text-decoration:none;">点击直接吊起微信手机授权弹窗</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6400" class="ax_default image">
+        <img id="u6400_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6384.jpg"/>
+        <div id="u6400_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6401" class="ax_default box_1">
+        <div id="u6401_div" class=""></div>
+        <div id="u6401_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6402" class="ax_default heading_2">
+        <div id="u6402_div" class=""></div>
+        <div id="u6402_text" class="text ">
+          <p><span style="text-decoration:none;">组件化账本</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Group) -->
+      <div id="u6403" class="ax_default" data-left="1931" data-top="3953" data-width="83" data-height="31">
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6404" class="ax_default box_1">
+          <div id="u6404_div" class=""></div>
+          <div id="u6404_text" class="text " style="display:none; visibility: hidden">
+            <p></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Line) -->
+        <div id="u6405" class="ax_default line">
+          <img id="u6405_img" class="img " src="images/分类和账户增删改/u20.svg"/>
+          <div id="u6405_text" class="text " style="display:none; visibility: hidden">
+            <p></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Group) -->
+        <div id="u6406" class="ax_default" data-left="1985" data-top="3959" data-width="18" data-height="18">
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6407" class="ax_default box_3">
+            <div id="u6407_div" class=""></div>
+            <div id="u6407_text" class="text " style="display:none; visibility: hidden">
+              <p></p>
+            </div>
+          </div>
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6408" class="ax_default box_3">
+            <div id="u6408_div" class=""></div>
+            <div id="u6408_text" class="text " style="display:none; visibility: hidden">
+              <p></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Unnamed (Group) -->
+        <div id="u6409" class="ax_default" data-left="1944" data-top="3965" data-width="18" data-height="6">
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6410" class="ax_default box_3">
+            <div id="u6410_div" class=""></div>
+            <div id="u6410_text" class="text " style="display:none; visibility: hidden">
+              <p></p>
+            </div>
+          </div>
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6411" class="ax_default box_3">
+            <div id="u6411_div" class=""></div>
+            <div id="u6411_text" class="text " style="display:none; visibility: hidden">
+              <p></p>
+            </div>
+          </div>
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6412" class="ax_default box_3">
+            <div id="u6412_div" class=""></div>
+            <div id="u6412_text" class="text " style="display:none; visibility: hidden">
+              <p></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6413" class="ax_default image">
+        <img id="u6413_img" class="img " src="images/分类和账户增删改/u95.png"/>
+        <div id="u6413_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Shape) -->
+      <div id="u6414" class="ax_default shape1">
+        <img id="u6414_img" class="img " src="images/分类和账户增删改/u28.svg"/>
+        <div id="u6414_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6415" class="ax_default box_1">
+        <div id="u6415_div" class=""></div>
+        <div id="u6415_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6416" class="ax_default box_1">
+        <img id="u6416_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6416.svg"/>
+        <div id="u6416_text" class="text ">
+          <p><span style="text-decoration:none;">通知栏收起不再展示</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Group) -->
+      <div id="u6417" class="ax_default" data-left="2076" data-top="5252" data-width="265" data-height="135">
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6418" class="ax_default box_1">
+          <div id="u6418_div" class=""></div>
+          <div id="u6418_text" class="text " style="display:none; visibility: hidden">
+            <p></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6419" class="ax_default heading_2">
+          <div id="u6419_div" class=""></div>
+          <div id="u6419_text" class="text ">
+            <p><span style="text-decoration:none;">提示</span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6420" class="ax_default paragraph">
+          <div id="u6420_div" class=""></div>
+          <div id="u6420_text" class="text ">
+            <p><span style="text-decoration:none;">手机号已被占用</span></p><p><span style="text-decoration:none;">可使用该手机登录随手记App解绑</span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Line) -->
+        <div id="u6421" class="ax_default line">
+          <img id="u6421_img" class="img " src="images/分类和账户增删改/u273.svg"/>
+          <div id="u6421_text" class="text " style="display:none; visibility: hidden">
+            <p></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6422" class="ax_default heading_2">
+          <div id="u6422_div" class=""></div>
+          <div id="u6422_text" class="text ">
+            <p><span style="text-decoration:none;">下载App</span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6423" class="ax_default heading_2">
+          <div id="u6423_div" class=""></div>
+          <div id="u6423_text" class="text ">
+            <p><span style="text-decoration:none;">关闭</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6424" class="ax_default heading_2">
+        <div id="u6424_div" class=""></div>
+        <div id="u6424_text" class="text ">
+          <p><span style="text-decoration:none;">场景2：账本首页新增绑定引导，未绑定则常驻</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6425" class="ax_default heading_2">
+        <div id="u6425_div" class=""></div>
+        <div id="u6425_text" class="text ">
+          <p><span style="text-decoration:none;">绑定成功</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6426" class="ax_default heading_2">
+        <div id="u6426_div" class=""></div>
+        <div id="u6426_text" class="text ">
+          <p><span style="text-decoration:none;">已有绑定手机失败提示统一</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6427" class="ax_default image">
+        <img id="u6427_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6348.png"/>
+        <div id="u6427_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6428" class="ax_default image">
+        <img id="u6428_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6348.png"/>
+        <div id="u6428_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6429" class="ax_default box_3">
+        <div id="u6429_div" class=""></div>
+        <div id="u6429_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6430" class="ax_default box_1">
+        <div id="u6430_div" class=""></div>
+        <div id="u6430_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6431" class="ax_default heading_2">
+        <div id="u6431_div" class=""></div>
+        <div id="u6431_text" class="text ">
+          <p><span style="text-decoration:none;">提示</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6432" class="ax_default paragraph">
+        <div id="u6432_div" class=""></div>
+        <div id="u6432_text" class="text ">
+          <p><span style="text-decoration:none;">手机号已被占用</span></p><p><span style="text-decoration:none;">可使用该手机登录随手记App解绑</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Line) -->
+      <div id="u6433" class="ax_default line">
+        <img id="u6433_img" class="img " src="images/分类和账户增删改/u273.svg"/>
+        <div id="u6433_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6434" class="ax_default heading_2">
+        <div id="u6434_div" class=""></div>
+        <div id="u6434_text" class="text ">
+          <p><span style="text-decoration:none;">下载App</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6435" class="ax_default heading_2">
+        <div id="u6435_div" class=""></div>
+        <div id="u6435_text" class="text ">
+          <p><span style="text-decoration:none;">关闭</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6436" class="ax_default heading_2">
+        <div id="u6436_div" class=""></div>
+        <div id="u6436_text" class="text ">
+          <p><span style="text-decoration:none;">修改后</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6437" class="ax_default heading_2">
+        <div id="u6437_div" class=""></div>
+        <div id="u6437_text" class="text ">
+          <p><span style="text-decoration:none;">需求背景</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6438" class="ax_default paragraph">
+        <div id="u6438_div" class=""></div>
+        <div id="u6438_text" class="text ">
+          <p><span style="text-decoration:none;">为了提升微信自然搜索来量，考虑接入微信服务搜索，因此需要满足”基础使用小程序不应强制绑定手机“的要求，小程序需要：</span></p><p><span style="text-decoration:none;">1、改造登录流程、原流程上支持跳过授权实现微信登录</span></p><p><span style="text-decoration:none;">2、增加场景支持绑定手机</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Diamond) -->
+      <div id="u6439" class="ax_default box_1">
+        <img id="u6439_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6359.svg"/>
+        <div id="u6439_text" class="text ">
+          <p><span style="text-decoration:none;">是否有缓存登录态</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6440" class="ax_default connector">
+        <img id="u6440_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6440_seg0.svg" alt="u6440_seg0"/>
+        <img id="u6440_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6440_seg1.svg" alt="u6440_seg1"/>
+        <img id="u6440_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6440_seg2.svg" alt="u6440_seg2"/>
+        <img id="u6440_seg3" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6440_seg3.svg" alt="u6440_seg3"/>
+        <img id="u6440_seg4" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6440_seg4.svg" alt="u6440_seg4"/>
+        <div id="u6440_text" class="text ">
+          <p><span style="text-decoration:none;">是</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6441" class="ax_default paragraph">
+        <div id="u6441_div" class=""></div>
+        <div id="u6441_text" class="text ">
+          <p><span style="text-decoration:none;">1、缓存登录态没有登录态时，默认取当前unionid关联的随手记账号</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6442" class="ax_default image">
+        <img id="u6442_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6442.png"/>
+        <div id="u6442_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6443" class="ax_default connector">
+        <img id="u6443_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6443_seg0.svg" alt="u6443_seg0"/>
+        <img id="u6443_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6443_seg1.svg" alt="u6443_seg1"/>
+        <img id="u6443_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6443_seg2.svg" alt="u6443_seg2"/>
+        <img id="u6443_seg3" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6443_seg3.svg" alt="u6443_seg3"/>
+        <img id="u6443_seg4" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6443_seg4.svg" alt="u6443_seg4"/>
+        <div id="u6443_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6444" class="ax_default box_1">
+        <div id="u6444_div" class=""></div>
+        <div id="u6444_text" class="text ">
+          <p><span style="text-decoration:none;">暂时跳过</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6445" class="ax_default box_1">
+        <div id="u6445_div" class=""></div>
+        <div id="u6445_text" class="text ">
+          <p><span style="text-decoration:none;">授权绑定微信手机号</span></p><p><span style="text-decoration:none;">多端登录查看流水更方便</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6446" class="ax_default heading_2">
+        <div id="u6446_div" class=""></div>
+        <div id="u6446_text" class="text ">
+          <p><span style="text-decoration:none;">场景3：审核成员加入时新增绑定引导，可跳过（对新增用户有影响）</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6447" class="ax_default image">
+        <img id="u6447_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6447.png"/>
+        <div id="u6447_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6448" class="ax_default box_3">
+        <div id="u6448_div" class=""></div>
+        <div id="u6448_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6449" class="ax_default image">
+        <img id="u6449_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6449.png"/>
+        <div id="u6449_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6450" class="ax_default connector">
+        <img id="u6450_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6450_seg0.svg" alt="u6450_seg0"/>
+        <img id="u6450_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6450_seg1.svg" alt="u6450_seg1"/>
+        <img id="u6450_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6450_seg2.svg" alt="u6450_seg2"/>
+        <img id="u6450_seg3" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6450_seg3.svg" alt="u6450_seg3"/>
+        <img id="u6450_seg4" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6450_seg4.svg" alt="u6450_seg4"/>
+        <div id="u6450_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6451" class="ax_default box_1">
+        <div id="u6451_div" class=""></div>
+        <div id="u6451_text" class="text ">
+          <p><span style="text-decoration:none;">暂时跳过</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6452" class="ax_default box_1">
+        <div id="u6452_div" class=""></div>
+        <div id="u6452_text" class="text ">
+          <p><span style="text-decoration:none;">授权绑定微信手机号</span></p><p><span style="text-decoration:none;">解锁多人记账权限功能</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6453" class="ax_default heading_2">
+        <div id="u6453_div" class=""></div>
+        <div id="u6453_text" class="text ">
+          <p><span style="text-decoration:none;">场景4：修改角色时新增绑定引导，不可跳过</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6454" class="ax_default image">
+        <img id="u6454_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6454.png"/>
+        <div id="u6454_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6455" class="ax_default box_3">
+        <div id="u6455_div" class=""></div>
+        <div id="u6455_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6456" class="ax_default image">
+        <img id="u6456_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6449.png"/>
+        <div id="u6456_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6457" class="ax_default connector">
+        <img id="u6457_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6457_seg0.svg" alt="u6457_seg0"/>
+        <img id="u6457_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6457_seg1.svg" alt="u6457_seg1"/>
+        <img id="u6457_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6457_seg2.svg" alt="u6457_seg2"/>
+        <img id="u6457_seg3" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6457_seg3.svg" alt="u6457_seg3"/>
+        <img id="u6457_seg4" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6457_seg4.svg" alt="u6457_seg4"/>
+        <div id="u6457_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6458" class="ax_default box_1">
+        <div id="u6458_div" class=""></div>
+        <div id="u6458_text" class="text ">
+          <p><span style="text-decoration:none;">授权绑定微信手机号</span></p><p><span style="text-decoration:none;">解锁多人记账权限功能</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6459" class="ax_default paragraph">
+        <div id="u6459_div" class=""></div>
+        <div id="u6459_text" class="text ">
+          <p><span style="text-decoration:none;">流水条数&lt;20时，非注册日首次记一笔展示一次，跳过后不再展示</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6460" class="ax_default image">
+        <img id="u6460_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6383.png"/>
+        <div id="u6460_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6461" class="ax_default paragraph">
+        <div id="u6461_div" class=""></div>
+        <div id="u6461_text" class="text ">
+          <p><span style="text-decoration:none;">点击取消，关闭弹出，停留在新增/编辑态</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6462" class="ax_default box_1">
+        <div id="u6462_div" class=""></div>
+        <div id="u6462_text" class="text ">
+          <p><span style="text-decoration:none;">授权绑定微信手机号</span></p><p><span style="text-decoration:none;">多端登录查看流水更方便</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6463" class="ax_default paragraph">
+        <div id="u6463_div" class=""></div>
+        <div id="u6463_text" class="text ">
+          <p><span style="text-decoration:none;color:#000000;">流水条数&gt;=20时，进入记一笔场景，该步骤</span><span style="text-decoration:none;color:#D9001B;">不可跳过</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6464" class="ax_default box_3">
+        <div id="u6464_div" class=""></div>
+        <div id="u6464_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6465" class="ax_default image">
+        <img id="u6465_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6465.png"/>
+        <div id="u6465_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6466" class="ax_default image">
+        <img id="u6466_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6447.png"/>
+        <div id="u6466_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Group) -->
+      <div id="u6467" class="ax_default" data-left="1709" data-top="5252" data-width="130" data-height="130">
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6468" class="ax_default box_1">
+          <img id="u6468_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6468.svg"/>
+          <div id="u6468_text" class="text " style="display:none; visibility: hidden">
+            <p></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Image) -->
+        <div id="u6469" class="ax_default _图片">
+          <img id="u6469_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6469.png"/>
+          <div id="u6469_text" class="text " style="display:none; visibility: hidden">
+            <p></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6470" class="ax_default label">
+          <div id="u6470_div" class=""></div>
+          <div id="u6470_text" class="text ">
+            <p><span style="text-decoration:none;">绑定成功</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6471" class="ax_default box_3">
+        <div id="u6471_div" class=""></div>
+        <div id="u6471_text" class="text ">
+          <p><span style="text-decoration:none;">绑定失败，请稍后重试</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6472" class="ax_default box_3">
+        <div id="u6472_div" class=""></div>
+        <div id="u6472_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6473" class="ax_default image">
+        <img id="u6473_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6465.png"/>
+        <div id="u6473_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6474" class="ax_default connector">
+        <img id="u6474_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6474_seg0.svg" alt="u6474_seg0"/>
+        <img id="u6474_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6474_seg1.svg" alt="u6474_seg1"/>
+        <img id="u6474_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6474_seg2.svg" alt="u6474_seg2"/>
+        <img id="u6474_seg3" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6474_seg3.svg" alt="u6474_seg3"/>
+        <img id="u6474_seg4" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6474_seg4.svg" alt="u6474_seg4"/>
+        <div id="u6474_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6475" class="ax_default connector">
+        <img id="u6475_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6475_seg0.svg" alt="u6475_seg0"/>
+        <img id="u6475_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6475_seg1.svg" alt="u6475_seg1"/>
+        <img id="u6475_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6475_seg2.svg" alt="u6475_seg2"/>
+        <img id="u6475_seg3" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6475_seg3.svg" alt="u6475_seg3"/>
+        <img id="u6475_seg4" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6475_seg4.svg" alt="u6475_seg4"/>
+        <div id="u6475_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6476" class="ax_default box_1">
+        <div id="u6476_div" class=""></div>
+        <div id="u6476_text" class="text ">
+          <p><span style="text-decoration:none;">触发登录</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6477" class="ax_default connector">
+        <img id="u6477_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6477_seg0.svg" alt="u6477_seg0"/>
+        <img id="u6477_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6477_seg1.svg" alt="u6477_seg1"/>
+        <img id="u6477_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6477_seg2.svg" alt="u6477_seg2"/>
+        <div id="u6477_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6478" class="ax_default connector">
+        <img id="u6478_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6478_seg0.svg" alt="u6478_seg0"/>
+        <img id="u6478_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6478_seg1.svg" alt="u6478_seg1"/>
+        <img id="u6478_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6478_seg2.svg" alt="u6478_seg2"/>
+        <div id="u6478_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6479" class="ax_default connector">
+        <img id="u6479_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6479_seg0.svg" alt="u6479_seg0"/>
+        <img id="u6479_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6479_seg1.svg" alt="u6479_seg1"/>
+        <img id="u6479_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6479_seg2.svg" alt="u6479_seg2"/>
+        <div id="u6479_text" class="text ">
+          <p><span style="text-decoration:none;">是</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Diamond) -->
+      <div id="u6480" class="ax_default box_1">
+        <img id="u6480_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6359.svg"/>
+        <div id="u6480_text" class="text ">
+          <p><span style="text-decoration:none;">跳过</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Group) -->
+      <div id="u6481" class="ax_default" data-left="341" data-top="666" data-width="120" data-height="57">
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6482" class="ax_default box_1">
+          <div id="u6482_div" class=""></div>
+          <div id="u6482_text" class="text " style="display:none; visibility: hidden">
+            <p></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6483" class="ax_default box_1">
+          <div id="u6483_div" class=""></div>
+          <div id="u6483_text" class="text ">
+            <p><span style="text-decoration:none;">原有授权手机登录流程</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6484" class="ax_default connector">
+        <img id="u6484_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6484_seg0.svg" alt="u6484_seg0"/>
+        <img id="u6484_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6484_seg1.svg" alt="u6484_seg1"/>
+        <img id="u6484_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6484_seg2.svg" alt="u6484_seg2"/>
+        <div id="u6484_text" class="text ">
+          <p><span style="text-decoration:none;">否</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6485" class="ax_default box_1">
+        <div id="u6485_div" class=""></div>
+        <div id="u6485_text" class="text ">
+          <p><span style="text-decoration:none;">结束</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6486" class="ax_default connector">
+        <img id="u6486_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6486_seg0.svg" alt="u6486_seg0"/>
+        <img id="u6486_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6486_seg1.svg" alt="u6486_seg1"/>
+        <img id="u6486_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6486_seg2.svg" alt="u6486_seg2"/>
+        <div id="u6486_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6487" class="ax_default image">
+        <img id="u6487_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6487.png"/>
+        <div id="u6487_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6488" class="ax_default paragraph">
+        <div id="u6488_div" class=""></div>
+        <div id="u6488_text" class="text ">
+          <p><span style="text-decoration:none;">为多端登录查看数据更方便，建议您登录</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6489" class="ax_default paragraph">
+        <div id="u6489_div" class=""></div>
+        <div id="u6489_text" class="text ">
+          <p><span style="text-decoration:none;">跳过</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6490" class="ax_default paragraph">
+        <div id="u6490_div" class=""></div>
+        <div id="u6490_text" class="text ">
+          <p><span style="text-decoration:none;">1、旧版 关闭按钮 改为&nbsp; 跳过</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6491" class="ax_default paragraph">
+        <div id="u6491_div" class=""></div>
+        <div id="u6491_text" class="text ">
+          <p><span style="text-decoration:none;">2、旧版提示文案更新</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6492" class="ax_default heading_2">
+        <div id="u6492_div" class=""></div>
+        <div id="u6492_text" class="text ">
+          <p><span style="text-decoration:none;">数据需求支持</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6493" class="ax_default paragraph">
+        <div id="u6493_div" class=""></div>
+        <div id="u6493_text" class="text ">
+          <p><span style="text-decoration:none;">1、小程序每日注册用户数：是否需要加需求区分小程序和公众号注册</span></p><p><span style="text-decoration:none;">2、累计注册用户数历史数据是否无法区分</span></p><p><span style="text-decoration:none;">3、小程序注册用户手机绑定率</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Shape) -->
+      <div id="u6494" class="ax_default shape1">
+        <img id="u6494_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6494.svg"/>
+        <div id="u6494_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6495" class="ax_default image">
+        <img id="u6495_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6348.png"/>
+        <div id="u6495_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6496" class="ax_default box_1">
+        <div id="u6496_div" class=""></div>
+        <div id="u6496_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6497" class="ax_default box_1">
+        <div id="u6497_div" class=""></div>
+        <div id="u6497_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6498" class="ax_default box_3">
+        <div id="u6498_div" class=""></div>
+        <div id="u6498_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6499" class="ax_default image">
+        <img id="u6499_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6465.png"/>
+        <div id="u6499_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6500" class="ax_default paragraph">
+        <div id="u6500_div" class=""></div>
+        <div id="u6500_text" class="text ">
+          <p><span style="text-decoration:none;">点击绑定</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6501" class="ax_default box_3">
+        <div id="u6501_div" class=""></div>
+        <div id="u6501_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6502" class="ax_default image">
+        <img id="u6502_img" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6465.png"/>
+        <div id="u6502_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Connector) -->
+      <div id="u6503" class="ax_default connector">
+        <img id="u6503_seg0" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6503_seg0.svg" alt="u6503_seg0"/>
+        <img id="u6503_seg1" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6503_seg1.svg" alt="u6503_seg1"/>
+        <img id="u6503_seg2" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6503_seg2.svg" alt="u6503_seg2"/>
+        <img id="u6503_seg3" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6503_seg3.svg" alt="u6503_seg3"/>
+        <img id="u6503_seg4" class="img " src="images/小程序微信静默登录和引导绑定手机（版本待定）/u6503_seg4.svg" alt="u6503_seg4"/>
+        <div id="u6503_text" class="text " style="display:none; visibility: hidden">
+          <p></p>
+        </div>
+      </div>
+    </div>
+    <script src="resources/scripts/axure/ios.js"></script>
+  </body>
+</html>
