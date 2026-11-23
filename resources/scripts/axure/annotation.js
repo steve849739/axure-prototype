@@ -39,12 +39,29 @@ $axure.internal(function($ax) {
     };
 
     var _toggleAnnotationDialog = function (elementId, event) {
-            var win = $(window);
-            var scrollY = win.scrollTop();
-            var scrollX = win.scrollLeft();
+        let win = $(window);
+        let scrollY = win.scrollTop();
+        let scrollX = win.scrollLeft();
+        
+        let x = event.pageX - scrollX;
+        let y = event.pageY - scrollY;
 
-        var messageData = { id: elementId, x: event.pageX - scrollX, y: event.pageY - scrollY }
-        if (window.name != 'mainFrame') messageData.page = $ax.pageData.notesData;
+        let frameElement = window.frameElement;
+        let parent = window.parent;
+        //ann dialog is relative to mainFrame, exclude the mainFrame location so the notes shows up correctly in device mode
+        while(frameElement && frameElement.name !== 'mainFrame') {
+            let rect = frameElement.getBoundingClientRect();
+            x += rect.x;
+            y += rect.y;
+            
+            if(!parent) break;
+
+            frameElement = parent.frameElement;
+            parent = parent.parent;
+        }
+        
+        let messageData = { id: elementId, x: x, y: y }
+        if (!$axure.utils.isInPlayer()) messageData.page = $ax.pageData.notesData;
         $ax.messageCenter.postMessage('toggleAnnDialog', messageData);
     }
     
@@ -134,11 +151,46 @@ $axure.internal(function($ax) {
         });
     });
 
+    var _getCornersForFootnotes = function (id) {
+        var element = document.getElementById(id);
+        var matrix = element ? $ax.public.fn.transformFromElement(element) : [1.0, 0.0, 0.0, 1.0, 0.0, 0.0];
+        var currentMatrix = { m11: matrix[0], m21: matrix[1], m12: matrix[2], m22: matrix[3], tx: matrix[4], ty: matrix[5] };
+        var dimensions = {};
+        var axObj = $ax('#' + id);
+        var viewportLocation = axObj.offsetLocation();
+        dimensions.left = viewportLocation.left;
+        dimensions.top = viewportLocation.top;
+
+        var parent = axObj.getParents(false, ['rdo', 'state', 'item'])[0];
+        var parentItem = axObj.getParents(false, ['item'])[0];
+        if (parent === parentItem) parent = undefined;
+        if (parent && parent.length > 0) {
+            var parentLocation = $ax('#' + parent).offsetLocation();
+            dimensions.left = dimensions.left - parentLocation.left;
+            dimensions.top = dimensions.top - parentLocation.top;
+        }
+
+        var size = axObj.size();
+        dimensions.width = size.width;
+        dimensions.height = size.height;
+
+        var halfWidth = dimensions.width * 0.5;
+        var halfHeight = dimensions.height * 0.5;
+        var preTransformTopRight = { x: halfWidth, y: -halfHeight };
+        var preTransformBottomRight = { x: halfWidth, y: halfHeight };
+
+        return {
+            relativeTopRight: $ax.public.fn.matrixMultiply(currentMatrix, preTransformTopRight),
+            relativeBottomRight: $ax.public.fn.matrixMultiply(currentMatrix, preTransformBottomRight),
+            centerPoint: { x: dimensions.left + halfWidth, y: dimensions.top + halfHeight }
+        }
+    }
+
     //adjust annotation location to a element's top right corner
     var _adjustIconLocation = $ax.annotation.adjustIconLocation = function(id, dObj) {
         var ann = document.getElementById(id + "_ann");
         if(ann) {
-            var corners = $ax.public.fn.getCornersFromComponent(id);
+            var corners = _getCornersForFootnotes(id);
             var width = $(ann).width();
             var newTopRight = $ax.public.fn.vectorPlus(corners.relativeTopRight, corners.centerPoint);
             //note size is 14x8, this is how rp calculated it as well
@@ -151,7 +203,7 @@ $axure.internal(function($ax) {
 
         var ref = document.getElementById(id + "_ref");
         if(ref) {
-            if(!corners) corners = $ax.public.fn.getCornersFromComponent(id);
+            if(!corners) corners = _getCornersForFootnotes(id);
             var newBottomRight = $ax.public.fn.vectorPlus(corners.relativeBottomRight, corners.centerPoint);
 
             ref.style.left = (newBottomRight.x - 8) + 'px';

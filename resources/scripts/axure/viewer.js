@@ -121,7 +121,7 @@ $axure.internal(function ($ax) {
 
         //Traverse through parent layers (if any) of an element and see if any have a defined userTriggeredEventName
         var _findMatchInParent = function(id) {
-            var parents = $ax('#' + id).getParents(true, ['layer'])[0];
+            var parents = $ax('#' + id).getParents(true, ['layer', 'rdo'])[0];
             for(var i in parents) {
                 var parentId = parents[i];
                 var parentObj = $ax.getObjectFromScriptId(parentId);
@@ -134,7 +134,7 @@ $axure.internal(function ($ax) {
         var $matchingElements = query.filter(function (obj, id) {
 
             //This prevents the top left corner of the page from highlighting with everything else
-            if($ax.public.fn.IsLayer(obj.type)) return false;
+            if($ax.public.fn.IsLayerOrRdo(obj.type)) return false;
 
             if(_isInteractive(obj)) return true;
             else if($ax.public.fn.IsVector(obj.type) && obj.referencePageUrl) return true;
@@ -154,6 +154,14 @@ $axure.internal(function ($ax) {
         }
     };
     
+    var getElementsFromPoint = function (x, y) {
+        var elementsFromPointFn = document.elementsFromPoint || document.msElementsFromPoint;
+        if (typeof elementsFromPointFn === "function") {
+            return elementsFromPointFn.bind(document)(x, y);
+        }
+        return [];
+    }
+
     $axure.getIdAndRectAtLoc = function (data) {
         var element = document.elementFromPoint(data.x, data.y);
         if (!element) return undefined;
@@ -162,10 +170,38 @@ $axure.internal(function ($ax) {
         if (jObj.length > 0) {
           var id = jObj.attr('id');
           var axObj = $ax('#' + id);
-          var rect = axObj.pageBoundingRect();
-          return { 'id': id, 'rect': rect };
+          try {
+            var rect = axObj.pageBoundingRect(); // can throw exception
+            return { 'id': id, 'rect': rect };
+          } catch (e) { }          
         }
         return undefined;
+    }
+
+    $axure.getListOfIdAndRectAtLoc = function (data) {
+        var domElements = getElementsFromPoint(data.x, data.y);
+
+        if (!domElements || !domElements.length) return [];
+
+        const elements = [];
+        
+        domElements.forEach(function (domElement) {
+            var jObj = _getElementIdFromTarget(domElement);
+            if (jObj.length > 0) {
+                var id = jObj.attr('id');
+                var axObj = $ax('#' + id);
+                var rect = undefined;
+                try {
+                    rect = axObj.pageBoundingRect(); // can throw exception
+                } catch (e) { }
+                
+                if (rect && elements.findIndex(function (x) { return x.id === id }) < 0) {                    
+                    elements.push( { 'id': id, 'rect': rect } );
+                }
+            }
+        });
+
+        return elements;
     }
 
     $axure.getIdRectAndStyleAtLoc = function(data) {
@@ -180,16 +216,50 @@ $axure.internal(function ($ax) {
         return undefined;
     }
 
+    $axure.getListOfIdRectAndStyleAtLoc = function(data) {
+        var domElements = getElementsFromPoint(data.x, data.y);
+
+        if (!domElements || !domElements.length) return [];
+        
+        const elements = [];
+        
+        domElements.forEach(function (domElement) {
+            var jObj = _getElementIdFromTarget(domElement);
+            if (jObj.length > 0) {
+                var id = jObj.attr('id');
+                var rectAndStyle = $axure.getRectAndStyleById(id);
+                if (rectAndStyle && elements.findIndex(function (x) { return x.id === id }) < 0) {
+                    elements.push(rectAndStyle);
+                }
+            }
+        });
+
+        return elements;
+    }
+
     $axure.getRectAndStyleById = function (id) {
         var axObj = $ax('#' + id);
-        var rect = axObj.pageBoundingRect();
-        var style = $ax.style.computeFullStyle(id, $ax.style.generateState(id), $ax.adaptive.currentViewId);
-        style.text = axObj.text();
-        return { 'id': id, 'rect': rect, 'style': style };
+        try {
+            var rect = axObj.pageBoundingRect(null, null, true); // can throw exception
+            var style = $ax.style.computeFullStyle(id, $ax.style.generateState(id), $ax.adaptive.currentViewId);
+            style.text = axObj.text();
+            return { 'id': id, 'rect': rect, 'style': style };
+        } catch (e) { }
+        
+        return undefined;
     }
 
     $axure.isIdVisible = function (id) {
         return id ? $ax.visibility.IsIdVisible(id) : false;
+    }
+
+    $axure.getParentElementById = function (elementId) {
+        if (!elementId) return undefined;
+        var parentId = $ax.getLayerParentFromElementId(elementId);
+        if (!parentId) {
+            return undefined;
+        }
+        return $axure.getRectAndStyleById(parentId);
     }
 
     var _getElementIdFromTarget = function (target) {

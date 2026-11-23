@@ -125,33 +125,7 @@
                 } else if(diagramObject.type == $ax.constants.CONNECTOR_TYPE) {
                     _setAdaptiveConnectorImages(elementId, images, '');
                 } else if(images) {
-                    if (diagramObject.generateCompound) {
-
-                        if($ax.style.IsWidgetDisabled(elementId)) {
-                            disabledImage = _getImageWithTag(images, 'disabled~');
-                            if(disabledImage) $ax.style.applyImage(elementId, disabledImage, 'disabled');
-                            return;
-                        }
-                        if($ax.style.IsWidgetSelected(elementId)) {
-                            selectedImage = _getImageWithTag(images, 'selected~');
-                            if(selectedImage) $ax.style.applyImage(elementId, selectedImage, 'selected');
-                            return;
-                        }
-                        $ax.style.applyImage(elementId, _getImageWithTag(images, 'normal~'), 'normal');
-                    } else {
-                        if ($ax.style.IsWidgetDisabled(elementId)) {
-                            var disabledImage = _matchImage(elementId, images, [], 'disabled', true);                            
-                            if (disabledImage) $ax.style.applyImage(elementId, disabledImage, 'disabled');
-                            return;
-                        }
-                        if ($ax.style.IsWidgetSelected(elementId)) {
-                            var selectedImage = _matchImage(elementId, images, [], 'selected', true);  
-                            if (selectedImage) $ax.style.applyImage(elementId, selectedImage, 'selected');
-                            return;
-                        }
-                        var normalImage = _matchImage(elementId, images, [], 'normal', true);  
-                        $ax.style.applyImage(elementId, normalImage, 'normal');
-                    }
+                    $ax.style.updateImage(elementId);
                 }
 
                 //align all text
@@ -161,16 +135,20 @@
             // we have to reset visibility if we aren't applying a new view
             $ax.visibility.resetLimboAndHiddenToDefaults();
             $ax.visibility.clearMovedAndResized();
+            $ax.style.clearAppliedStyles();
             $ax.repeater.refreshAllRepeaters();
             $ax.dynamicPanelManager.updateParentsOfNonDefaultFitPanels();
             $ax.dynamicPanelManager.updatePercentPanelCache($ax('*'));
+            $ax.expr.updateAutoFitted();
         } else {
             $ax.visibility.clearLimboAndHidden();
             $ax.visibility.clearMovedAndResized();
+            $ax.style.clearAppliedStyles();
             _applyView(viewId);
             $ax.repeater.refreshAllRepeaters();
             $ax.dynamicPanelManager.updateAllLayerSizeCaches();
             $ax.dynamicPanelManager.updateParentsOfNonDefaultFitPanels();
+            $ax.expr.updateAutoFitted();
         }
 
         $ax.annotation.updateAllFootnotes();
@@ -324,12 +302,12 @@
         // this style INCLUDES the object's my style
         var compoundStyle = $.extend({}, diagramObject.style, adaptiveStyle);
 
-        if (diagramObject.owner.type == 'Axure:Master' && diagramObject.adaptiveStyles) {
-            adaptiveStyle = $ax.style.computeFullStyle(elementId, state, viewId);
-        }
+        // if (diagramObject.owner.type == 'Axure:Master' && diagramObject.adaptiveStyles) {
+        //     adaptiveStyle = $ax.style.computeFullStyle(elementId, state, viewId);
+        // }
 
         if(!diagramObject.isContained) {
-            $ax.style.setAdaptiveStyle(elementId, adaptiveStyle);
+            $ax.style.setAdaptiveStyle(elementId, adaptiveStyle, state);
         }
 
         var scriptId = $ax.repeater.getScriptIdFromElementId(elementId);
@@ -338,33 +316,44 @@
         if(compoundStyle.visible === false) hiddenIds[scriptId] = true;
     };
 
-    var _matchImage = function(id, images, viewIdChain, state, doNotProgress) {
-        var override = $ax.style.getElementImageOverride(id, state);
+    var _matchImage = function (id, images, viewIdChain, state, doNotDecomposeState) {
+        const overrideState = $ax.style.highestPriorityBaseState(state);
+        const override = $ax.style.getElementImageOverride(id, overrideState);
         if(override) return override;
 
         if(!images) return undefined;
 
-        var scriptId = $ax.repeater.getScriptIdFromElementId(id);
+        const scriptId = $ax.repeater.getScriptIdFromElementId(id);
+
         // first check all the images for this state
-        for(var i = viewIdChain.length - 1; i >= 0; i--) {
-            var viewId = viewIdChain[i];
-            var img = images[scriptId + "~" + state + "~" + viewId];
-            if(!img) img = images[state + "~" + viewId];
-            if(img) return img;
+        for(let i = viewIdChain.length - 1; i >= 0; i--) {
+            const viewId = viewIdChain[i];
+            const img = findImage(images, scriptId, state, viewId);
+            if (img) return img;
         }
         // check for the default state style
-        var defaultStateImage = images[scriptId + "~" + state + "~"];
-        if(!defaultStateImage) defaultStateImage = images[state + "~"];
-        if(defaultStateImage) return defaultStateImage;
+        // try to find an image for the default state or for the highest priority state if no default was found. RP-1854
+        const defaultStateImage = findImage(images, scriptId, state) || findImage(images, scriptId, overrideState);
+        if (defaultStateImage) return defaultStateImage;
+        
+        if(doNotDecomposeState) return undefined;
 
-        if(doNotProgress) return undefined;
-
-        state = $ax.style.progessState(state);
+        state = $ax.style.decomposeState(state);
         if (state) return _matchImage(scriptId, images, viewIdChain, state);
 
         // SHOULD NOT REACH HERE! NORMAL SHOULD ALWAYS CATCH AT THE DEFAULT!
         return images['normal~']; // this is the default
     };
+
+    let findImage = function(images, scriptId, state, viewId) {
+        if(!images) return undefined;
+
+        if(!viewId) viewId = "";
+        let withScript = scriptId + "~" + state + "~" + viewId;
+        let img = images[withScript];
+        if(!img) img = images[state + "~" + viewId];
+        return img;
+    }
 
     var _matchImageCompound = function(diagramObject, id, viewIdChain, state) {
         var images = [];
@@ -441,9 +430,9 @@
         //If the adaptive plugin hasn't been initialized yet then 
         //save the view to load so that it can get set when initialize occurs
         if (message == 'switchAdaptiveView') {
-            if (window.name != 'mainFrame') return;
+            if (!$axure.utils.isInPlayer()) return;
 
-            var href = window.location.href.split('#')[0];
+            var href = decodeURI(window.location.href.split('?')[0]);
             var lastSlash = href.lastIndexOf('/');
             href = href.substring(lastSlash + 1);
             if(href != data.src) return;
@@ -454,14 +443,14 @@
                 _initialViewToLoad = view;
             } else _handleLoadViewId(view);
         } else if (message == 'setAdaptiveViewForSize') {
-            if (window.name != 'mainFrame') return;
+            if (!$axure.utils.isInPlayer()) return;
 
             _autoIsHandledBySidebar = true;
             if(!_isAdaptiveInitialized()) {
                 _initialViewSizeToLoad = data;
             } else _handleSetViewForSize(data.width, data.height);
         } else if (message == 'getScale') {
-            if (window.name != 'mainFrame') return;
+            if (!$axure.utils.isInPlayer()) return;
 
             var prevScaleN = data.prevScaleN;
             var newScaleN = 1;
@@ -469,32 +458,32 @@
             
             var $body = $('body');
             $body.css('height', '');
-
-            if (data.scale != 0) {
+            
+            if (data.scale != 0 && data.scale != 3) {
                 var adjustScrollScale = false;
-                if ($('html').getNiceScroll().length == 0 && !MOBILE_DEVICE && !SAFARI) {
+                if ($('html').getNiceScroll().length == 0 && !MOBILE_DEVICE) {
                     //adding nicescroll so width is correct when getting scale
-                    _addNiceScroll($('html'), { emulatetouch: false, horizrailenabled: false });
+                    _addNiceScroll($('html'), { emulatetouch: false, horizrailenabled: false, spacebarenabled: false }, true);
                     adjustScrollScale = true;
                 }
-                if (!MOBILE_DEVICE && SAFARI) _removeNiceScroll($('html'));
-
+                
                 $('html').css('overflow-x', 'hidden');
 
-                var bodyWidth = $body.width();
-                var isCentered = $body.css('position') == 'relative';
-                
+                var view = $ax.adaptive.currentViewId ? _idToView[$ax.adaptive.currentViewId] : $ax.pageData.defaultAdaptiveView;
+                var bodyWidth = view.size.width;
+
                 // screen width does not adjust on screen rotation for iOS (width is always shorter screen measurement)
                 var isLandscape = window.orientation != 0 && window.orientation != 180;
                 var mobileWidth = (IOS ? (isLandscape ? window.screen.height : window.screen.width) : window.screen.width) - data.panelWidthOffset;
-                var scaleN = newScaleN = (MOBILE_DEVICE ? mobileWidth : $(window).width()) / bodyWidth;
-
+                var scaleN = newScaleN = (MOBILE_DEVICE ? mobileWidth : data.mainFrameWidth) / bodyWidth;
+                
                 if (data.scale == 2) {
                     var pageSize = $ax.public.fn.getPageSize();
-                    var hScaleN = (MOBILE_DEVICE ? data.viewportHeight : $(window).height()) / Math.max(1, pageSize.bottom);
+                    var hScaleN = (MOBILE_DEVICE ? data.viewportHeight : data.mainFrameHeight) / Math.max(1, pageSize.bottom);
                     if (hScaleN < scaleN) {
                         scaleN = newScaleN = hScaleN;
                     }
+                    var isCentered = $body.css('position') == 'relative';
                     if (isCentered) contentOriginOffset = scaleN * (bodyWidth / 2);
                 }
 
@@ -504,15 +493,25 @@
                 } //else $body.css('height', $body.height() + 'px');
 
                 if (adjustScrollScale) {
-                    _removeNiceScroll($('html'));
-                    _addNiceScroll($('html'), { emulatetouch: false, horizrailenabled: false, cursorwidth: Math.ceil(6 / newScaleN) + 'px', cursorborder: 1 / newScaleN + 'px solid #fff', cursorborderradius: 5 / newScaleN + 'px' });
+                    _removeNiceScroll($('html'), true);
+                    _addNiceScroll($('html'), { emulatetouch: false, horizrailenabled: false, spacebarenabled: false, cursorwidth: Math.ceil(6 / newScaleN) + 'px', cursorborder: 1 / newScaleN + 'px solid #fff', cursorborderradius: 5 / newScaleN + 'px' }, true);
                 }
-            }
+            } else {
+                if (data.scale == 0) {
+                    scaleN = newScaleN = 1;
+                }
+                if (data.scale == 3) {
+                    const zoom = $(document).find("html").attr("zoom") ? parseInt($(document).find("html").attr("zoom"),10) : 100;
+                    scaleN = newScaleN = zoom/100;
+                }
+            }          
             var contentScale = {
                 scaleN: newScaleN,
                 prevScaleN: prevScaleN,
                 contentOriginOffset: contentOriginOffset,
                 clipToView: data.clipToView,
+                mainFrameHeight: data.mainFrameHeight,
+                mainFrameWidth: data.mainFrameWidth,
                 viewportHeight: data.viewportHeight,
                 viewportWidth: data.viewportWidth,
                 panelWidthOffset: data.panelWidthOffset,
@@ -521,7 +520,7 @@
             $axure.messageCenter.postMessage('setContentScale', contentScale);
 
         } else if (message == 'setDeviceMode') {
-            if (window.name != 'mainFrame') return;
+            if (!$axure.utils.isInPlayer()) return;
 
             _isDeviceMode = data.device;
             if (data.device) {
@@ -532,12 +531,17 @@
                 //    $('html').css('height', pageSize.bottom + 'px');
                 //}
                 
-                _removeNiceScroll($('html'));
+                _removeNiceScroll($('html'), true);
                 if (!MOBILE_DEVICE) {
-                    _addNiceScroll($('html'), { emulatetouch: true, horizrailenabled: false });
-                    $('html').addClass('mobileFrameCursor');
-                    $('html').css('cursor', 'url(resources/css/images/touch.cur), auto');
-                    $('html').css('cursor', 'url(resources/css/images/touch.svg) 32 32, auto');
+                    _addNiceScroll($('html'), { emulatetouch: true, horizrailenabled: false, spacebarenabled: false }, true);
+                    if (data.cursor === 0) {
+                        $('html').css('cursor', 'default');
+                    } else {
+                        $('html').addClass('mobileFrameCursor');
+                        $('html').css('cursor', 'url(resources/css/images/touch.cur), auto');
+                        $('html').css('cursor', 'url(resources/css/images/touch.svg) 16 16, auto');
+                    }
+                    
                     $('html').css('overflow-x', 'hidden');
 
                     if (IE) {
@@ -561,8 +565,11 @@
                 $('body').css('margin', '0px');
                 $(function () { _setHorizontalScroll(false); });
             } else {
-                _removeNiceScroll($('html'));
-                $('html').css('overflow-x', '');
+                _removeNiceScroll($('html'), true);
+                const zoom = $(document).find("html").attr("zoom") ? parseInt($(document).find("html").attr("zoom"),10) : 100;
+                if (zoom == 100){
+                    $('html').css('overflow-x', '');
+                }
                 $('html').css('cursor', '');
                 //$('html').removeAttr('style');
                 $('body').css('margin', '');
@@ -578,15 +585,64 @@
     $ax.adaptive.isDeviceMode = function () {
         return _isDeviceMode;
     }
+
+    var _isHtmlQuery = function ($container) { return $container.length > 0 && $container[0] == $('html')[0]; }
     
     var _removeNiceScroll = $ax.adaptive.removeNiceScroll = function ($container, blockResetScroll) {
         if (!blockResetScroll) {
             $container.scrollLeft(0);
             $container.scrollTop(0);
         }
-        $container.getNiceScroll().remove();
+        var nS = $container.getNiceScroll();
+        var emulateTouch = nS.length > 0 && nS[0].opt.emulateTouch;
+        nS.remove();
         //clean up nicescroll css
+        $container.css({ 'overflow': '' });
         if (IE) $container.css({ '-ms-overflow-y': '', 'overflow-y': '', '-ms-overflow-style': '', '-ms-touch-action': '' });
+        if (!emulateTouch) return; 
+        if (_isHtmlQuery($container)) {
+            $('.scrollContainer').remove();
+            $('#base').off('mouseleave.ax');
+        } else {
+            $container.off('mouseleave.ax');
+        }
+    }
+
+    var _addNiceScrollExitDetector = function ($container) {
+        if (_isHtmlQuery($container)) {
+            var isScrollContainerExist = $('.scrollContainer').length > 0;
+            
+            // add a fixed div the size of the frame that will not move as we scroll like html,body,#base,children
+            // so we are able to detect when the mouse leaves that frame area if there is no existing DOM element
+            var $scrollContainer = isScrollContainerExist ? $('.scrollContainer') : $("<div class='scrollContainer'></div>");
+            var $body = $('body');
+            $scrollContainer.css({
+                'position': 'fixed',
+                'width': $body.width(),
+                'height': $body.height()
+            });
+
+            // we want #base div to handle the event so that it bubbles up from the scrollContainer div which
+            // handles the bounds of the frame in case there was no previously exisiting child to bubble up the
+            // event or if the user has clicked on an existing child node to start the emulated touch scroll
+            var $base = $('#base');
+            $base.on('mouseleave.ax', function (e) {
+                var nS = $container.getNiceScroll();
+                for (var i = 0; i < nS.length; ++i)
+                    nS[i].ontouchend(e);
+            });
+            // need to prepend so it is first child in DOM and doesn't block mouse events to other children which
+            // would make them unable to scroll
+            if (!isScrollContainerExist){
+                $base.prepend($scrollContainer);
+            }
+        } else {
+            $container.on('mouseleave.ax', function (e) {
+                var nS = $container.getNiceScroll();
+                for (var i = 0; i < nS.length; ++i)
+                    nS[i].ontouchend(e);
+            });
+        }
     }
 
     var _addNiceScroll = $ax.adaptive.addNiceScroll = function ($container, options, blockResetScroll) {
@@ -595,8 +651,21 @@
             $container.scrollTop(0);
         }
         $container.niceScroll(options);
+        // RP-581 add handling to stop scroll on mouse leave if enable cursor-drag scrolling like touch devices in desktop computer
+        if (options.emulatetouch) _addNiceScrollExitDetector($container);
         //clean up nicescroll css so child scroll containers show scrollbars in IE
         if (IE) $container.css({ '-ms-overflow-y': '', '-ms-overflow-style': '' });
+        if(IOS) $container.css({ 'overflow-y': ''});
+    }
+
+    //given the element, find the container that's using nice scroll (including the element itself)
+    $ax.adaptive.getNiceScrollContainer = function(element) {
+        var parent = element;
+        while(parent) {
+            if($(parent).getNiceScroll().length > 0) return parent;
+            parent = parent.parentElement;
+        }
+        return undefined;
     }
 
 

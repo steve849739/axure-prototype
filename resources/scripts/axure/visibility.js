@@ -7,6 +7,10 @@
     var _defaultLimbo = {};
 
     // ******************  Visibility and State Functions ****************** //
+    var _pageNotesEnabled = true;
+    $axure.messageCenter.addMessageListener(function (message, data) {
+        if(message == 'annotationToggle') _pageNotesEnabled = data;
+    });
 
     var _isIdVisible = $ax.visibility.IsIdVisible = function(id) {
         return $ax.visibility.IsVisible(window.document.getElementById(id));
@@ -35,11 +39,13 @@
 
     $ax.visibility.SetVisible = function (element, visible) {
         //not setting display to none to optimize measuring
-        if(visible) {
-            if($(element).hasClass(HIDDEN_CLASS)) $(element).removeClass(HIDDEN_CLASS);
-            if($(element).hasClass(UNPLACED_CLASS)) $(element).removeClass(UNPLACED_CLASS);
+        if (visible) {
+            var jElement = $(element);
+            if(jElement.hasClass(HIDDEN_CLASS)) jElement.removeClass(HIDDEN_CLASS);
+            if(jElement.hasClass(UNPLACED_CLASS)) jElement.removeClass(UNPLACED_CLASS);
             element.style.display = '';
             element.style.visibility = 'inherit';
+            if(jElement.hasClass(SELECTED_ClASS)) $ax.style.SetWidgetSelected(element.id, true);
         } else {
             element.style.display = 'none';
             element.style.visibility = 'hidden';
@@ -89,7 +95,7 @@
                     if(mouseOveredElement && !mouseOveredElement.is(":visible")) {
                         var axObj = $obj($ax.event.mouseOverObjectId);
 
-                        if(($ax.public.fn.IsDynamicPanel(axObj.type) || $ax.public.fn.IsLayer(axObj.type)) && axObj.propagate) {
+                        if(($ax.public.fn.IsDynamicPanel(axObj.type) || $ax.public.fn.IsLayer(axObj.type) || $ax.public.fn.IsRepeater(axObj.type)) && axObj.propagate) {
                             mouseOveredElement.trigger('mouseleave');
                         } else mouseOveredElement.trigger('mouseleave.ixStyle');
                     }
@@ -103,12 +109,41 @@
 
         //set the visibility of the annotation box as well if it exists
         var ann = document.getElementById(elementId + "_ann");
-        if(ann) _visibility.SetVisible(ann, options.value);
+        if(ann) {
+            _visibility.SetVisible(ann, options.value);
+            var jAnn = $("#" + elementId + "_ann");
+            if(_pageNotesEnabled) jAnn.show();
+            else jAnn.hide();
+        }
 
         //set ref visibility for ref of flow shape, if that exists
         var ref = document.getElementById(elementId + '_ref');
         if(ref) _visibility.SetVisible(ref, options.value);
+
+        if(options.value && !MOBILE_DEVICE && $ax.adaptive.isDeviceMode()) _updateMobileScrollForWidgetShown(axObj);
     };
+
+    var _updateMobileScrollForWidgetShown = function(widget) {
+        var isPanel = $ax.public.fn.IsDynamicPanel(widget.type);
+        var isLayer = $ax.public.fn.IsLayer(widget.type);
+        if (isPanel) {
+            var elementId = $id(widget);
+            var stateId = $ax.repeater.applySuffixToElementId(elementId, '_state0');
+            $ax.dynamicPanelManager.updateMobileScroll(elementId, stateId, true);
+            if (!widget.diagrams) return;
+            for (var i = 0; i < widget.diagrams.length; ++i) {
+                var diagram = widget.diagrams[i];
+                if (!diagram.objects) continue;
+                for (var j = 0; j < diagram.objects.length; ++j) {
+                    _updateMobileScrollForWidgetShown(diagram.objects[j]);
+                }
+            }
+        } else if (isLayer) {
+            for (var i = 0; i < widget.objs.length; ++i) {
+                _updateMobileScrollForWidgetShown(widget.objs[i]);
+            }
+        }
+    }
 
     var _setVisibility = function(parentId, childId, options, preserveScroll) {
         var wrapped = $jobj(childId);
@@ -127,7 +162,7 @@
         var isIdFitToContent = $ax.dynamicPanelManager.isIdFitToContent(parentId);
         //fade and resize won't work together when there is a container... but we still needs the container for fit to content DPs
         var needContainer = options.easing && options.easing != 'none' && (options.easing != 'fade' || isIdFitToContent);
-        var cullPosition = options.cull ? options.cull.css('position') : '';
+        var cullPosition = options.cull ? (isIdFitToContent ? 'relative' : 'absolute') : '';
         var containerExists = options.containerExists;
 
         var isFullWidth = $ax.dynamicPanelManager.isPercentWidthPanel($obj(childId));
@@ -295,11 +330,66 @@
             return;
         }
 
-        if(!options.easing || options.easing == 'none') {
+        if (!options.easing || options.easing == 'none') {
             $ax.visibility.SetIdVisible(childId, options.value);
             completeTotal = 1;
             onComplete();
-        } else if(options.easing == 'fade') {
+        } else if (options.easing == 'scale' || options.easing == 'fadeAndScale') {
+            var innerContainer = $('<div></div>');
+            innerContainer.attr('id', containerId + "_inner");
+            innerContainer.data('flip', options.direction == 'left' || options.direction == 'right' ? 'y' : 'x');
+            innerContainer.css({
+                position: 'relative',
+                'width': containerWidth,
+                'height': containerHeight,
+                'display': 'flex'
+            });
+
+            innerContainer.appendTo(container);
+            wrapped.appendTo(innerContainer);
+            completeTotal = 1;
+
+            innerContainer.css('transform-origin', options.scaleAnchor);
+
+            if(options.value){
+                child.css({
+                    'display': '',
+                    'visibility': 'inherit'
+                });
+
+                visibleWrapped.css({
+                    'display': '',
+                    'visibility': 'inherit'
+                });
+            }
+
+            var withFade = options.easing == 'fadeAndScale';
+
+            $({ offset: 0 }).animate({ offset: 1 }, {
+                duration: options.duration,
+                easing: options.animation,
+                queue: false,
+                step: function (now, fx) {
+                    var scale;
+                    if (options.value) scale = now + options.scale - now * options.scale;
+                    else scale = 1 - now + now * options.scale;
+                    innerContainer.css('transform', 'scale(' + scale + ')');
+
+                    if (withFade) {
+                        var opacity;
+                        if (options.value) opacity = now;
+                        else opacity = 1 - now;
+                        innerContainer.css('opacity', opacity);
+                    }
+                },
+                complete: function () {
+                    $ax.visibility.SetIdVisible(childId, options.value);
+                    wrapped.insertBefore(innerContainer);
+                    innerContainer.remove();
+                    onComplete();
+                },
+            });
+        } else if (options.easing == 'fade') {
             if(options.value) {
                 if(preserveScroll) {
                     visibleWrapped.css('opacity', 0);
@@ -309,7 +399,7 @@
                     _tryResumeScrollForDP(childId);
                     visibleWrapped.animate({ opacity: 1 }, {
                         duration: options.duration,
-                        easing: 'swing',
+                        easing: options.animation,
                         queue: false,
                         complete: function() {
                             $ax.visibility.SetIdVisible(childId, true);
@@ -323,21 +413,26 @@
                     visibleWrapped.fadeIn({
                         queue: false,
                         duration: options.duration, 
+                        easing: options.animation,
                         complete: onComplete
                     });
                 }
             } else {
                 // Fading here is being strange...
-                visibleWrapped.animate({ opacity: 0 }, { duration: options.duration, easing: 'swing', queue: false, complete: function() {
-                    $ax.visibility.SetIdVisible(childId, false);
-                    visibleWrapped.css('opacity', '');
-
-                    onComplete();
-                }});
+                visibleWrapped.animate({ opacity: 0 }, {
+                    duration: options.duration,
+                    easing: options.animation,
+                    queue: false,
+                    complete: function () {
+                        $ax.visibility.SetIdVisible(childId, false);
+                        visibleWrapped.css('opacity', '');
+                        onComplete();
+                    }
+                });
             }
         } else if (options.easing == 'flip') {
             //this container will hold 
-            var trapScroll = _trapScrollLoc(childId);
+            var trapScroll = _trapScrollLoc(parentId);
             var innerContainer = $('<div></div>');
             innerContainer.attr('id', containerId + "_inner");
             innerContainer.data('flip', options.direction == 'left' || options.direction == 'right' ? 'y' : 'x');
@@ -380,15 +475,29 @@
                         break;
                 }
 
-                var onFlipShowComplete = function() {
-                    var trapScroll = _trapScrollLoc(childId);
+                var hasNoTrs = child.hasClass('notrs');
+
+                var onFlipShowComplete = function () {
+                    // return the scroll position to the correct location after unexpected reset of the scroll to the top after multiple flip-animation compliting. RP-2192
+                    var preventNextScroll = function () {
+                        var preventFunc = function (e) {
+                            trapScroll();
+                            e.preventDefault();
+                            window.removeEventListener("scroll", preventFunc);
+                        }
+                        window.addEventListener("scroll", preventFunc);
+                    }
+
+                    var trapScroll = _trapScrollLoc(parentId);
                     $ax.visibility.SetIdVisible(childId, true);
+                    if(hasNoTrs) child.addClass('notrs');
 
                     wrapped.insertBefore(innerContainer);
                     innerContainer.remove();
                     trapScroll();
 
                     onComplete();
+                    preventNextScroll();
                 };
 
                 innerContainer.css({
@@ -400,6 +509,7 @@
                     'display': '',
                     'visibility': 'inherit'
                 });
+                if(hasNoTrs) child.removeClass('notrs');
 
                 visibleWrapped.css({
                     'display': '',
@@ -407,6 +517,7 @@
                 });
 
                 innerContainer.css({
+                    'transition-property': 'transform',
                     '-webkit-transition-duration': options.duration + 'ms',
                     'transition-duration': options.duration + 'ms'
                 });
@@ -430,10 +541,13 @@
                         break;
                 }
 
+                var hasNoTrs = child.hasClass('notrs');
+
                 var onFlipHideComplete = function() {
-                    var trapScroll = _trapScrollLoc(childId);
+                    var trapScroll = _trapScrollLoc(parentId);
                     wrapped.insertBefore(innerContainer);
                     $ax.visibility.SetIdVisible(childId, false);
+                    if(hasNoTrs) child.addClass('notrs');
 
                     innerContainer.remove();
                     trapScroll();
@@ -442,11 +556,14 @@
                 };
 
                 innerContainer.css({
+                    'transition-property': 'transform',
                     '-webkit-backface-visibility': 'hidden',
                     'backface-visibility': 'hidden',
                     '-webkit-transition-duration': options.duration + 'ms',
                     'transition-duration': options.duration + 'ms'
                 });
+
+                if(hasNoTrs) child.removeClass('notrs');
 
                 if(preserveScroll) _tryResumeScrollForDP(childId);
                 _setRotateTransformation(innerContainer, flipdegree, containerDiv, onFlipHideComplete, options.duration, true);
@@ -536,7 +653,7 @@
         };
 
         if(useAnimationFrame) {
-            if (FIREFOX) $('body').hide().show(0); //forces FF to render the animation            
+            if(FIREFOX || CHROME) $('body').hide().show(0); //forces FF to render the animation            
             requestAnimationFrame(function() {
                 elementsToSet.css(trasformCss);
             });
@@ -558,8 +675,18 @@
         return '';
     };
 
+    $ax.visibility.GetCurrentPanelDiagram = function (id) {
+        var obj = $obj(id);
+        if ($ax.public.fn.IsDynamicPanel(obj.type) && obj.diagrams && obj.diagrams.length > 0) {
+            var stateId = $ax.visibility.GetPanelState(id);
+            var stateLabel = $jobj(stateId).data('label');
+            return obj.diagrams.find(x => x.label === stateLabel);
+        }
+        return null;
+    };
+
     var containerCount = {};
-    $ax.visibility.SetPanelState = function(id, stateId, easingOut, directionOut, durationOut, easingIn, directionIn, durationIn, showWhenSet) {
+    $ax.visibility.SetPanelState = function(id, stateId, animationOutInfo, animationInInfo, showWhenSet) {
         var show = !$ax.visibility.IsIdVisible(id) && showWhenSet;
         if(show) $ax.visibility.SetIdVisible(id, true);
 
@@ -575,7 +702,7 @@
             return;
         }
 
-        var hasEasing = easingIn != 'none' || easingOut != 'none';
+        var hasEasing = animationInInfo.easingType != 'none' || animationOutInfo.easingType != 'none';
         if(hasEasing) _pushContainer(id, true);
 
         var state = $jobj(stateId);
@@ -586,7 +713,24 @@
         //pin to browser
         if(isFixed) $ax.dynamicPanelManager.adjustFixed(id, oldState.width(), oldState.height(), state.width(), state.height());
 
-        _bringPanelStateToFront(id, stateId, oldStateId, easingIn == 'none' || durationIn == '0');
+        function updateIframeUrl(iframe) {
+            var origSrc = iframe.attr('src');
+            if(origSrc && origSrc.toLowerCase().indexOf('http://') == -1) {
+                origSrc = origSrc.split("?")[0];
+                var newSrcUrl = $ax.globalVariableProvider.getLinkUrl(origSrc);
+                iframe.attr('src', newSrcUrl);
+            }
+        }
+
+        oldState.find('iframe').each(function () {
+            updateIframeUrl($(this));
+        });
+        state.find('iframe').each(function () {
+            updateIframeUrl($(this));
+        });
+ 
+
+        _bringPanelStateToFront(id, stateId, oldStateId, animationInInfo.easingType == 'none' || animationInInfo.duration == '0');
 
         var fitToContent = $ax.dynamicPanelManager.isIdFitToContent(id);
         var resized = false;
@@ -597,17 +741,18 @@
             var newBoundingRect = $ax('#' + stateId).childrenBoundingRect();
             var width = newBoundingRect.right;
             var height = newBoundingRect.bottom;
-            var oldBoundingRect = $ax('#' + id).size();
+            var oldBoundingRect = $ax('#' + id).offsetBoundingRect();
             var oldWidth = oldBoundingRect.right;
             var oldHeight = oldBoundingRect.bottom;
             resized = width != oldWidth || height != oldHeight;
             //resized = width != oldState.width() || height != oldState.height();
 
             $ax.visibility.setResizedSize(id, $obj(id).percentWidth ? oldWidth : width, height);
+            $ax.visibility.setResizingRect(id, oldBoundingRect);
         }
 
         //edge case for sliding
-        var movement = (directionOut == 'left' || directionOut == 'up' || state.children().length == 0) && oldState.children().length != 0 ? oldState : state;
+        var movement = (animationOutInfo.direction == 'left' || animationOutInfo.direction == 'up' || state.children().length == 0) && oldState.children().length != 0 ? oldState : state;
         var onCompleteCount = 0;
         var onComplete = function () {
             //move this call from _setVisibility() for animate out.
@@ -629,40 +774,45 @@
             $ax.event.leavingState(oldStateId);
             if (hasEasing) _popContainer(id, true);
 
-            $ax.dynamicPanelManager.updateMobileScroll(id, stateId);
+            $ax.dynamicPanelManager.updateMobileScroll(id, stateId, true);
         };
         // Must do state out first, so if we cull by new state, location is correct
         _setVisibility(id, oldStateId, {
             value: false,
-            easing: easingOut,
-            direction: directionOut,
-            duration: durationOut,
+            easing: animationOutInfo.easingType,
+            direction: animationOutInfo.direction,
+            duration: animationOutInfo.duration,
+            animation: animationOutInfo.animation,
+            scale: animationOutInfo.scale,
+            scaleAnchor: animationOutInfo.scaleAnchor,
             containerExists: true,
             onComplete: function() {
-//                if(easingIn !== 'flip') _bringPanelStateToFront(id, stateId);
                 if (++onCompleteCount == 2) onComplete();
             },
             settingChild: true,
             size: movement,
             //cull for 
-            cull: easingOut == 'none' || state.children().length == 0 ? oldState : state,
+            cull: animationOutInfo.easingType == 'none' || state.children().length == 0 ? oldState : state,
             showFlipBack: true
         });
 
         _setVisibility(id, stateId, {
             value: true,
-            easing: easingIn,
-            direction: directionIn,
-            duration: durationIn,
+            easing: animationInInfo.easingType,
+            direction: animationInInfo.direction,
+            duration: animationInInfo.duration,
+            animation: animationInInfo.animation,
+            scale: animationInInfo.scale,
+            scaleAnchor: animationInInfo.scaleAnchor,
             containerExists: true,
             onComplete: function () {
-//                if (easingIn === 'flip') _bringPanelStateToFront(id, stateId);
                 if (++onCompleteCount == 2) onComplete();
             },
             settingChild: true,
             //size for offset
             size: movement,
-            showFlipBack: true
+            showFlipBack: true,
+            cull: state
         });
 
         if(show) $ax.event.raiseSyntheticEvent(id, 'onShow');
@@ -684,8 +834,7 @@
             };
 
             if(!panel) {
-                var boundingRect = $ax('#' + id).offsetBoundingRect();
-                //var boundingRect = $axure.fn.getWidgetBoundingRect(id);
+                var boundingRect = $ax('#' + id).offsetBoundingRectToComponent();
                 css.top = boundingRect.top;
                 css.left = boundingRect.left;
             }
@@ -738,7 +887,7 @@
                         left: '-=' + css.left,
                         top: '-=' + css.top
                     };
-                    if($ax.getTypeFromElementId(childId) == $ax.constants.LAYER_TYPE) {
+                    if($ax.public.fn.IsLayer($ax.getTypeFromElementId(childId))) {
                         _pushContainer(childId, false);
                         $ax.visibility.applyWidgetContainer(childId, true).css(cssChange);
                     } else {
@@ -808,7 +957,7 @@
                     left: '+=' + left,
                     top: '+=' + top
                 };
-                if($ax.getTypeFromElementId(childId) == $ax.constants.LAYER_TYPE) {
+                if($ax.public.fn.IsLayer($ax.getTypeFromElementId(childId))) {
                     $ax.visibility.applyWidgetContainer(childId, true).css(cssChange);
                     _popContainer(childId, false);
                 } else {
@@ -863,7 +1012,12 @@
         trapScroll();
     };
 
-    var _trapScrollLoc = function(id) {
+    var _trapScrollLoc = function (id) {
+        var jWindow = $(window);
+        var windowLoc = {
+            x: jWindow.scrollLeft(),
+            y: jWindow.scrollTop()
+        }
         var locs = {};
         var states = $jobj(id).find('.panel_state');
         for(var i = 0; i < states.length; i++) {
@@ -876,6 +1030,8 @@
                 state.scrollLeft(locs[key].x);
                 state.scrollTop(locs[key].y);
             }
+            jWindow.scrollLeft(windowLoc.x);
+            jWindow.scrollTop(windowLoc.y);
         };
     }
 
@@ -885,7 +1041,7 @@
 
         if(!id) return id;
         var jobj = $(window.lastFocusedClickable);
-        return jobj.is('a') || jobj.is('input') ? id : '';
+        return jobj.is('a') || jobj.is('input') || jobj.is('textarea') ? id : '';
     }
 
     var _setCurrFocus = function(id) {
@@ -938,6 +1094,8 @@
             css.perspective = '800px';
             css.webkitPerspective = "800px";
             css.mozPerspective = "800px";
+            //adding this to make Edge happy
+            css['transform-style'] = 'preserve-3d';
         } else css.overflow = 'hidden';
 
         //perspective on container will give us 3d effect when flip
@@ -1087,7 +1245,7 @@
     };
 
     $ax.visibility.GetPanelStateCount = function(id) {
-        return $ax.visibility.getRealChildren($jobj(id).children()).length;
+        return $ax.visibility.getRealChildren($jobj(id).children()).filter("[id*='_state']").length;
     };
 
     var _bringPanelStateToFront = function (dpId, stateId, oldStateId, oldInFront) {
@@ -1116,21 +1274,21 @@
             for(var i = 0; i < ids.length; i++) limboedByMaster[ids[i]] = true;
         }
 
-        var hiddenByMaster = {};
-        for(key in newHiddenIds) {
-            if (!$ax.public.fn.IsReferenceDiagramObject($ax.getObjectFromElementId(key).type)) continue;
-            ids = $ax.model.idsInRdoToHideOrLimbo(key);
-            for(i = 0; i < ids.length; i++) hiddenByMaster[ids[i]] = true;
-        }
+        //var hiddenByMaster = {};
+        //for(key in newHiddenIds) {
+        //    if (!$ax.public.fn.IsReferenceDiagramObject($ax.getObjectFromElementId(key).type)) continue;
+        //    ids = $ax.model.idsInRdoToHideOrLimbo(key);
+        //    for(i = 0; i < ids.length; i++) hiddenByMaster[ids[i]] = true;
+        //}
 
         // Extend with children of rdos
         newLimboIds = $.extend(newLimboIds, limboedByMaster);
-        newHiddenIds = $.extend(newHiddenIds, hiddenByMaster);
+        //newHiddenIds = $.extend(newHiddenIds, hiddenByMaster);
 
         // something is only visible if it's not hidden and limboed
         query.each(function(diagramObject, elementId) {
             // Rdos already handled, contained widgets are limboed by the parent, and sub menus should be ignored
-            if(diagramObject.isContained || $ax.public.fn.IsReferenceDiagramObject(diagramObject.type) || $ax.public.fn.IsTableCell(diagramObject.type) || $jobj(elementId).hasClass('sub_menu')) return;
+            if(diagramObject.isContained || $ax.public.fn.IsTableCell(diagramObject.type) || $jobj(elementId).hasClass('sub_menu')) return;
             if(diagramObject.type == 'table' && $jobj(elementId).parent().hasClass('ax_menu')) return;
             if(skipRepeater) {
                 // Any item in a repeater should return
@@ -1190,6 +1348,7 @@
     var _movedIds = _visibility.movedIds = {};
     var _resizedIds = _visibility.resizedIds = {};
     var _rotatedIds = _visibility.rotatedIds = {};
+    var _resizingIds = _visibility.resizingIds = {};
 
     $ax.visibility.getMovedLocation = function(scriptId) {
         return _movedIds[scriptId];
@@ -1212,7 +1371,7 @@
         var offsetLocation = $ax('#' + scriptId).offsetLocation();
         $ax.visibility.setMovedLocation(scriptId, offsetLocation.x + deltaLeft, offsetLocation.y + deltaTop);
 
-        if($ax.getTypeFromElementId(scriptId) == $ax.constants.LAYER_TYPE) {
+        if($ax.public.fn.IsLayer($ax.getTypeFromElementId(scriptId))) {
             var childIds = $ax('#' + scriptId).getChildren()[0].children;
             for (var i = 0; i < childIds.length; i++) {
                 $ax.visibility.moveMovedLocation(childIds[i], deltaLeft, deltaTop);
@@ -1234,6 +1393,18 @@
         _resizedIds[scriptId] = { width: width, height: height };
     };
 
+    $ax.visibility.getResizingRect = function (scriptId) {
+        return _resizingIds[scriptId];
+    }
+
+    $ax.visibility.setResizingRect = function (scriptId, offsetBoundingRect) {
+        _resizingIds[scriptId] = offsetBoundingRect;
+    }
+
+    $ax.visibility.clearResizingRects = function () {
+        _resizingIds = _visibility.resizingIds = {};
+    }
+
     $ax.visibility.getRotatedAngle = function (scriptId) {
         return _rotatedIds[scriptId];
     };
@@ -1246,6 +1417,7 @@
         _movedIds = _visibility.movedIds = {};
         _resizedIds = _visibility.resizedIds = {};
         _rotatedIds = _visibility.rotatedIds = {};
+        _resizingIds = _visibility.resizingIds = {};
     };
 
     $ax.visibility.clearMovedAndResizedIds = function (elementIds) {
@@ -1254,6 +1426,7 @@
             delete _movedIds[id];
             delete _resizedIds[id];
             delete _rotatedIds[id];
+            delete _resizingIds[id];
         }
     };
 
@@ -1285,5 +1458,6 @@
 
     var HIDDEN_CLASS = _visibility.HIDDEN_CLASS = 'ax_default_hidden';
     var UNPLACED_CLASS = _visibility.UNPLACED_CLASS = 'ax_default_unplaced';
+    var SELECTED_ClASS = 'selected';
 
 });

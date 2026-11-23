@@ -245,6 +245,21 @@ $axure.internal(function($ax) {
 
     var _exprFunctions = {};
 
+    _exprFunctions.ToLowerCase = function (value) {
+        let str = _exprFunctions.ToString(value);
+        return str.toLowerCase();
+    };
+
+    _exprFunctions.SetErrorState = function (elementIds, value) {
+        var toggle = value == 'toggle';
+        var boolValue = Boolean(value) && value != 'false';
+
+        for(var i = 0; i < elementIds.length; i++) {
+            var query = $ax('#' + elementIds[i]);
+            query.error(toggle ? !query.error() : boolValue);
+        }
+    };
+
     _exprFunctions.SetCheckState = function(elementIds, value) {
         var toggle = value == 'toggle';
         var boolValue = Boolean(value) && value != 'false';
@@ -364,8 +379,177 @@ $axure.internal(function($ax) {
             });
 
             if(!plain) $ax.style.CacheOriginalText(id, true);
+
+            autofitWidget(ids[i]);
         }
     };
+
+    var _autoFitIds = $ax.expr.autoFitIds = {};
+
+    _setAutoFitId = $ax.expr.setAutoFitId = function (scriptId, css) {
+        _autoFitIds[scriptId] = css;
+    };
+
+    $ax.expr.clearAutoFittedIds = function (elementIds) {
+        for (var i = 0; i < elementIds.length; i++) {
+            var id = elementIds[i];
+            delete _autoFitIds[id];
+        }
+    };
+
+    $ax.expr.updateAutoFitted = function () {
+        for (var id  in _autoFitIds) {
+            autofitWidget(id);
+        }
+    }
+
+    var _needsDisplay = function (id) {
+        var parent = document.getElementById(id);
+        while (parent) {
+            if (parent.style.display == 'none') return true;
+            parent = parent.parentElement;
+        }
+        return false;
+    };
+
+    var _getMeasureContainer = function () {
+        var $container = $jobj("measure");
+        if ($container.length == 0) {
+            $container = $("<div id='measure' style='position: absolute; width:0px; height:0px'></div>");
+            $("body").append($container);
+        }
+        return $container;
+    };
+
+    var _displayWidgetIfNeeded = function(id) {        
+        var jobj = $jobj(id);
+        var needsDisplay = _needsDisplay(id);
+        if(!needsDisplay) return {
+            jObject: jobj,
+            trap: undefined
+        };
+
+        var $container = _getMeasureContainer();
+        jobj = jobj.clone();
+        $container.append(jobj);
+        jobj.css('display', 'block');
+        
+        return {
+            jObject: jobj,
+            trap: function() {
+                jobj.remove();
+            }
+        };
+    }
+    $ax.expr.displayWidgetIfNeeded = _displayWidgetIfNeeded;
+
+
+    var _displayWidgetAndParents = function(id) {
+        var parents = $ax('#' + id).getParents(true, '*')[0];
+        parents.push(id); // also need to show self
+
+        var displayed = [];
+        for(var i = 0; i < parents.length; i++) {
+            var currId = parents[i];
+            var currObj = $jobj(currId);
+            if(currObj.css('display') == 'none') {
+                currObj.css('display', 'block');
+                displayed.push(currId);
+            }
+        }
+
+        return function() {
+            for(var i = 0; i < displayed.length; i++) {
+                $jobj(displayed[i]).css('display', 'none');
+            }
+        };
+    }
+    $ax.expr.displayWidgetAndParents = _displayWidgetAndParents;
+
+    var autofitWidget = function (id) {
+
+        var obj = $obj(id);
+        if (obj.autoFitHeight || obj.autoFitWidth) {
+
+            var values = _displayWidgetIfNeeded(id);
+            var jobj = values.jObject;
+            var trap = values.trap;
+
+            var query = $ax('#' + id);
+            var size = query.size();
+            var css = {
+                width: size.width,
+                height: size.height
+            };
+
+            var textId = $ax.GetTextPanelId(id, true);
+            var style = $ax.style.computeFullStyle(id, $ax.style.generateState(id), $ax.adaptive.currentViewId);
+
+            if (obj.autoFitHeight) {
+                var jText = jobj.children('#' + textId);
+                var newHeight = jText.height();
+                if (style.paddingTop) newHeight += Number(style.paddingTop);
+                if (style.paddingBottom) newHeight += Number(style.paddingBottom);
+
+                if (newHeight - size.height != 0) {
+                    css.height = newHeight;
+                }
+            };
+
+            if (obj.autoFitWidth) {
+                var pars = jobj.find('p');
+                var newWidth = 0;
+
+                for (var j = 0; j < pars.length; ++j) {
+                    var spans = $(pars[j]).children('span');
+                    var w = 0;
+                    for (var i = 0; i < spans.length; ++i) {
+                        w += $(spans[i]).width();
+                    }
+                    if (w > newWidth) newWidth = w;
+                }
+
+                if (style.paddingLeft) newWidth += Number(style.paddingLeft);
+                if (style.paddingRight) newWidth += Number(style.paddingRight);
+
+                if (newWidth - size.width != 0) {
+                    css.width = newWidth;
+                }
+            };
+
+            const deltaWidth = css.width - size.width;
+            const deltaHeight = css.height - size.height;
+
+            if (deltaWidth !== 0 || deltaHeight !== 0) {
+                query.resize(css, {});
+
+                const hAlign = style.horizontalAlignment;
+                const vAlign = style.verticalAlignment;
+                let dx = 0;
+                let dy = 0;
+
+                if (hAlign === "right") {
+                    dx = -deltaWidth;
+                } else if (hAlign === "center") {
+                    dx = -deltaWidth / 2;
+                }
+
+                if (vAlign === "bottom") {
+                    dy = -deltaHeight;
+                } else if (vAlign === "middle") {
+                    dy = -deltaHeight / 2;
+                }
+
+                if (dx !== 0 || dy !== 0) {
+                    $ax.move.MoveWidget(id, dx, dy, { easing: 'none', duration: 0 }, false, null, true);
+                }
+            }
+
+            if(trap) trap();
+
+            _setAutoFitId(id, css);
+        }
+    }
 
     _exprFunctions.GetCheckState = function(ids) {
         return $ax('#' + ids[0]).selected();
@@ -378,6 +562,10 @@ $axure.internal(function($ax) {
     _exprFunctions.GetSelectedOption = function (ids) {
         var inputs = $jobj($ax.INPUT(ids[0]));
         return inputs.length ? inputs[0].value : '';
+    };
+
+    _exprFunctions.GetErrorState = function (ids) {
+        return $ax('#' + ids[0]).error();
     };
 
     _exprFunctions.GetNum = function(str) {
@@ -529,7 +717,7 @@ $axure.internal(function($ax) {
         if (eventInfo && eventInfo.srcElement) {
             var id = eventInfo.srcElement;
             var diagramObject = $ax.getObjectFromElementId(id);
-            if (diagramObject.owner.type == 'Axure:Master') {
+            if (diagramObject.owner.type == 'Axure:Master' || diagramObject.owner.type == 'referenceDiagramObject') {
                 var viewIdChain = $ax.style.getViewIdChain($ax.adaptive.currentViewId || '', id, diagramObject);
                 if (viewIdChain.length > 0) return viewIdChain[viewIdChain.length - 1];
                 else return '19e82109f102476f933582835c373474';

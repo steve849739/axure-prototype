@@ -9,6 +9,7 @@ $axure.internal(function($ax) {
         if(!(value instanceof Object)) value = value.toString();
 
         variable = variable.toLowerCase();
+        var variableValueWasChanged = (_globalVariableValues[variable] || $ax.document.globalVariables[variable]) !== value;
         _globalVariableValues[variable] = value;
 
         if(suppressBroadcast !== true) {
@@ -24,6 +25,8 @@ $axure.internal(function($ax) {
         if($ax.pageData) {
             _postGlobalVarVals();
         }
+
+        if(variableValueWasChanged) $ax.variableChangePageAndMasters(variable);
     };
     _globalVariableProvider.setVariableValue = setVariableValue;
 
@@ -82,40 +85,42 @@ $axure.internal(function($ax) {
     _globalVariableProvider.getVariableValue = getVariableValue;
 
     var load = function() {
-        var csum = false;
-
-        var query = (window.location.href.split("#")[1] || ''); //hash.substring(1); Firefox decodes this so & in variables breaks
+        let query = (window.location.href.split("?")[1] || ''); //hash.substring(1); Firefox decodes this so & in variables breaks
         if(query.length > 0) {
-            var vars = query.split("&");
-            for(var i = 0; i < vars.length; i++) {
-                var pair = vars[i].split("=");
-                var varName = pair[0];
-                var varValue = pair[1];
-                if(varName) {
-                    if(varName == 'CSUM') {
-                        csum = true;
-                    } else setVariableValue(varName, decodeURIComponent(varValue), true);
-                }
-            }
-
-            if(!csum && query.length > 250) {
-                window.alert('Axure Warning: The variable values were too long to pass to this page.\n\nIf you are using IE, using Chrome or Firefox will support more data.');
-            }
+            $ax.utils.parseGlobalVars(query, setVariableValue);
         }
     };
+    _globalVariableProvider.load = load;
 
-    var getLinkUrl = function(baseUrl) {
+    var getLinkUrl = function(baseUrl, useGlobalVarName) {
         var toAdd = '';
+        var hasQueryParam = baseUrl.indexOf('?') >= 0;
         var definedVariables = _getDefinedVariables();
         for(var i = 0; i < definedVariables.length; i++) {
             var key = definedVariables[i];
             var val = getVariableValue(key, undefined, true);
-            if(val != null) { 
-                if(toAdd.length > 0) toAdd += '&';
-                toAdd += key + '=' + encodeURIComponent(val);
+            if (val != null) {
+                if (toAdd.length === 0) {
+                    if (useGlobalVarName) {
+                        if (hasQueryParam) toAdd += '&';
+                        toAdd += GLOBAL_VAR_NAME;
+                    }
+                    toAdd += key + '=' + encodeURIComponent(val);
+                } else {
+                    toAdd += '&' + key + '=' + encodeURIComponent(val);
+                }
             }
         }
-        return toAdd.length > 0 ? baseUrl + ($axure.shouldSendVarsToServer() ? '?' : '#') + toAdd + "&CSUM=1" : baseUrl;
+
+        if (window.location.protocol !== 'file:' && window.parent && window.parent.CLOUD_VAR_NAME) {
+            var cl = $ax.utils.getQueryString(window.parent.CLOUD_VAR_NAME, window.parent.location.href);
+            if (cl && cl.length > 0) {
+                if (toAdd.length > 0 || hasQueryParam) toAdd += '&';
+                toAdd += window.parent.CLOUD_VAR_NAME + '=' + cl;
+            }
+        }
+
+        return toAdd.length > 0 ? baseUrl + (hasQueryParam ? '' : '?') + toAdd + "&" + GLOBAL_VAR_CHECKSUM + "=1" : baseUrl;
     };
     _globalVariableProvider.getLinkUrl = getLinkUrl;
 
@@ -146,6 +151,4 @@ $axure.internal(function($ax) {
             _postGlobalVarVals();
         }
     });
-
-    load();
 });

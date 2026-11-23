@@ -4,6 +4,14 @@
  *
  *
  */
+const START_URL_NAME = 'start.html';
+const PAGE_ID_NAME = 'id';
+const PAGE_URL_NAME = 'p';
+const SITEMAP_COLLAPSE_VAR_NAME = 'c';
+const SITEMAP_COLLAPSE_VALUE = "1";
+const SITEMAP_CLOSE_VALUE = "2";
+const GLOBAL_VAR_NAME = 'ZQZ=s&';
+const GLOBAL_VAR_CHECKSUM = 'CSUM';
 
  (function() {
      // define the root namespace object
@@ -63,6 +71,10 @@
          };
      };
 
+     $axure.utils.reloadCSS = function (url, id) {
+         $('#' + id).remove();
+         $('head').append('<link id="' + id + '" text="text/css" href="' + url + '" rel="Stylesheet" />');
+     }
 
      $axure.utils.loadCSS = function(url) {
          $('head').append('<link text="text/css" href="' + url + '" rel="Stylesheet" />');
@@ -115,6 +127,60 @@
          }
          return returnVal;
      };
+     
+     $axure.utils.isInPlayer = function() { return window.name == 'mainFrame'; }
+     // This will return true if prototype is opened from version of app after update with code that sets this value 
+     // (won't be able to distinguish between browser and outdated app)
+     $axure.utils.isShareApp = function () { return /ShareApp/.test(navigator.userAgent); }
+
+     $axure.utils.setHashStringVar = function (currentQuery, varName, varVal) {
+         var varWithEqual = varName + '=';
+         var poundVarWithEqual = varVal === '' ? '' : '?' + varName + '=' + varVal;
+         var ampVarWithEqual = varVal === '' ? '' : '&' + varName + '=' + varVal;
+         var queryToSet = '';
+
+         var pageIndex = currentQuery.indexOf('?' + varWithEqual);
+         if (pageIndex == -1) pageIndex = currentQuery.indexOf('&' + varWithEqual);
+         if (pageIndex != -1) {
+             var newQuery = currentQuery.substring(0, pageIndex);
+
+             newQuery = newQuery == '' ? poundVarWithEqual : newQuery + ampVarWithEqual;
+
+             var ampIndex = currentQuery.indexOf('&', pageIndex + 1);
+             if (ampIndex != -1) {
+                 newQuery = newQuery == '' ? '?' + currentQuery.substring(ampIndex + 1) : newQuery + currentQuery.substring(ampIndex);
+             }
+             queryToSet = newQuery;
+         } else if (currentQuery.indexOf('?') != -1) {
+             queryToSet = currentQuery + ampVarWithEqual;
+         } else {
+             queryToSet = poundVarWithEqual;
+         }
+
+         if (queryToSet != '' || varVal == '') {
+             return queryToSet;
+         }
+
+         return null;
+     }
+
+     $axure.utils.parseGlobalVars = function(query, setAction) {
+         let vars = query.split("&");
+         let csum = false;
+         for(let i = 0; i < vars.length; i++) {
+             let pair = vars[i].split("=");
+             let varName = pair[0];
+             let varValue = pair[1];
+             if(varName) {
+                 if(varName == GLOBAL_VAR_CHECKSUM) csum = true;
+                 else setAction(varName, decodeURIComponent(decodeURIComponent(varValue)), true);
+             }
+         }
+
+         if(!csum && query.length > 250) {
+             window.alert('Axure Warning: The variable values were too long to pass to this page.\n\nIf you are using IE, using Chrome or Firefox will support more data.');
+         }
+     }
 
      var matrixBase = {
          mul: function(val) {
@@ -169,6 +235,34 @@
          return $axure.utils.Matrix2D(1, 0, 0, 1, 0, 0);
      };
 
+     var getParameter = function (qstring, query) {
+         var prms = qstring[1].split("&");
+         var frmelements = new Array();
+         var currprmeter, querystr = "";
+
+         for (var i = 0; i < prms.length; i++) {
+             currprmeter = prms[i].split("=");
+             frmelements[i] = new Array();
+             frmelements[i][0] = currprmeter[0];
+             frmelements[i][1] = currprmeter[1];
+         }
+
+         for (j = 0; j < frmelements.length; j++) {
+             if (frmelements[j][0].toLowerCase() == query.toLowerCase()) {
+                 querystr = frmelements[j][1];
+                 break;
+             }
+         }
+         return querystr;
+     }
+
+     $axure.utils.getQueryString = function (query, url) {
+         if (!url) url = window.location.href;
+
+         var qstring = url.split("?");
+         if (qstring.length < 2) return "";
+         return getParameter(qstring, query);
+     };
  })();
 
  // TODO: [mas] simplify this

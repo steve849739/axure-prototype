@@ -46,13 +46,13 @@ ul.sitemapTree {
 }
 
 .pageSwapInstructions {
-    width: 129px;
     font-size: 12px;
     text-align: center;
-    color: #8c8c8c;
+    color: #718096;
     margin: 0 auto;
     padding: 12px 0px;
     line-height: 20px;
+    opacity: .8;
 }
 
 .sitemapMinus, .sitemapPlus {
@@ -109,6 +109,10 @@ ul.sitemapTree {
     background-size: contain;
 }
 
+.sitemapFlowIcon {
+    background: url('images/flow.svg') no-repeat center center, linear-gradient(transparent,transparent);
+}
+
 .sitemapFolderOpenIcon {
     background: url('images/folder_open.png') no-repeat center center;
     background: url('images/folder_open.svg') no-repeat center center, linear-gradient(transparent,transparent);
@@ -116,8 +120,8 @@ ul.sitemapTree {
 
 .sitemapPageName {
     font-size: 14px;
-    line-height: 1.93;
-    color: #4a4a4a;
+    line-height: 2.1;
+    /*color: #4a4a4a;*/
 }
 
 .sitemapPageName.mobileText {
@@ -138,7 +142,14 @@ ul.sitemapTree {
 }
 
 .sitemapHighlight {
-    background-color: #e6e6e6;
+    background-color: #BFDBFE66 !important;
+}
+
+.sitemapHover {
+}
+
+.sitemapHover:hover {
+    background-color: #F5FAFE;
 }
 
 .sitemapGreyedName
@@ -146,25 +157,37 @@ ul.sitemapTree {
 	color: #AAA;
 }
 
-.sitemapPluginNameHeader {
-    margin: 13px 9px 5px 9px;
-    font-size: 14px;
-    color: #444444;
-}
-
 .sitemapHeader {
-    padding-top: 7px;
+    padding-top: 20px;
 }
 
 .mobileMode .sitemapHeader {
     padding-top: 0px;
 }
 
-.sitemapToolbar {
-    margin: 0px 3px 0px 5px;
+.toolbarRow {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    padding: 0 3px 0 12px;
+}
+
+.searchBar {
+    margin: 16px 0;
+}
+
+#expandCollapseAll {
+    margin: 0 2px 0 10px;
+    width: 28px;
+    height: 28px;
+}
+
+#expandCollapseAll.expanded {
+    background: url('images/collapse.svg') no-repeat center center, linear-gradient(transparent,transparent);
+}
+
+#expandCollapseAll.collapsed {
+    background: url('images/expand.svg') no-repeat center center, linear-gradient(transparent,transparent);
 }
 
 .sitemapToolbarButton {
@@ -177,7 +200,7 @@ ul.sitemapTree {
 
 .hashover .sitemapToolbarButton:hover {
     border-radius: 3px;
-    background-color: #e6e6e6 !important;
+    background-color: #E5E7EB66 !important;
 }
 
 .sitemapToolbarButton.sitemapToolbarButtonSelected, .sitemapToolbarButton.sitemapToolbarButtonSelected:hover{
@@ -196,24 +219,27 @@ ul.sitemapTree {
 }
 
 #searchIcon {
-    width: 10px;
-    height: 10px;
-    object-fit: contain;
-    background: url('images/search_on.svg') no-repeat center center, linear-gradient(transparent,transparent);
-    vertical-align: bottom;
-    padding: 5px 4px 5px 4px;
-    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: url('images/search_on.svg') no-repeat left center, linear-gradient(transparent,transparent);
+    margin: 0 8px;
+    flex-shrink: 0;
 }
 
-#searchIcon.sitemapToolbarButtonSelected {
-    padding: 5px 3px 5px 5px;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
-    border-left: solid 1px #cccccc;
-    border-top: solid 1px #cccccc;
-    border-bottom: solid 1px #cccccc;
-    background: url('images/search_off.svg') no-repeat center center, linear-gradient(transparent,transparent);
-    background-color: #FFFFFF !important;
+#clearSearchIcon {
+    width: 16px;
+    height: 16px;
+    background: url('images/close.svg') no-repeat left center, linear-gradient(transparent,transparent);
+    padding-right: 8px;
+    flex-shrink: 0;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#searchDiv:hover #clearSearchIcon.visible {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .backKeys {
@@ -245,17 +271,32 @@ ul.sitemapTree {
     top: 36px;
 }
 
+.vpZoomValue + #interfaceScaleListContainer {
+    padding-top: 5px;
+    border-top: solid 1px #e2e8f0;
+}
+
 #interfaceScaleListContainer {
-    padding: 7.5px 9px 12px 16px;
-    margin-top: 9px;
-    border-top: solid 1px #bdbcbc;
+    padding: 4px 13px;
     order: 10;
 }
 
 .adaptiveViewOption, .vpPresetOption, .vpScaleOption {
-    padding: 3px 0px 3px 0px;
-    color: #3B3B3B;
+    padding: 5px 0px 5px 0px;
+    /*color: #3B3B3B;*/
     display: flex;
+}
+
+.adaptiveViewOption:hover .adapViewRadioButton {
+    border-color: rgb(148 163 184);
+}
+
+.vpScaleOption:hover .scaleRadioButton {
+    border-color: rgb(148 163 184);
+}
+
+.vpScaleOption[hidden] {
+    display: none !important;
 }
 
 .projectOptionsScaleRow, .projectOptionsAdaptiveViewRow, .projectOptionsHotspotsRow {
@@ -270,7 +311,8 @@ ul.sitemapTree {
 }
 
 .scaleRadioButton, .adapViewRadioButton {
-    border: solid 1px #8c8c8c;
+    border: solid 1px #CBD5E1;
+    box-sizing: border-box;
     display: inline-block;
     position: relative;
     width: 12px;
@@ -292,43 +334,37 @@ ul.sitemapTree {
 }
 
 .selectedRadioButton {
-    border: solid 1px #20aca9;
+    border: solid 4px #2563EB !important;
 }
-
-.selectedRadioButtonFill { 
-    position: relative;
-    display: none;
-    background-color: #20aca9;
-    margin: auto;
-    width: 8px;
-    height: 8px;
-    border-radius: 30px;
-    top: 2px;
-}
-    .mobileMode .selectedRadioButtonFill {
-        width: 12px;
-        height: 12px;
-        border-radius: 48px;
-        top: 4px;
-    }
 
 #searchDiv {
     display: flex;
+    box-sizing: border-box;
+    align-items: center;
     margin-right: auto;
     flex: 1;
+    height: 28px;
+    background-color: #f8fafc;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+#searchDiv:hover {
+    border: 1px solid #94a3b8;
+}
+
+#searchDiv:focus-within {
+    border: 1px solid #4f46e5;
 }
 
 #searchBox {
-    display: none;
-    width: 0%;
-    height: 22px;
-    padding-left: 5px;
-    border-radius: 0px 5px 5px 0px;
-    border-right: solid 1px #cccccc;
-    border-top: solid 1px #cccccc;
-    border-bottom: solid 1px #cccccc;
-    border-left: none;
+    width: 100%;
+    height: auto;
+    border: none;
     -webkit-appearance: none;
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", Segoe UI Symbol, "Noto Color Emoji";
+    color: #1e293b;
+    background-color: #f8fafc;
 }
 
 #searchBox:focus {

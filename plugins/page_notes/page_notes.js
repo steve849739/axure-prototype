@@ -9,14 +9,14 @@
             $axure.player.createPluginHost({
                 id: 'pageNotesHost',
                 context: 'inspect',
-                title: 'Documentation',
+                title: 'Notes',
                 gid: 2,
             });
         }
 
         // Load footnotes on widgets
         if ($axure.document.configuration.showAnnotations) {
-            $('#overflowMenuContainer').prepend('<div id="showNotesOption" class="showOption" style="order: 3"><div class="overflowOptionCheckbox"></div>Show Note Markers</div>');
+            $('#overflowMenuContainer').prepend('<div id="showNotesOption" class="showOption" style="order: 3"><div class="overflowOptionCheckbox"></div>Show note markers</div>');
         }
 
         createNotesOverlay();
@@ -29,6 +29,14 @@
             $('#showNotesOption').find('.overflowOptionCheckbox').addClass('selected');
         }
 
+        function escapeXSS(htmlStr) {
+            return htmlStr.replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
         function populateNotes(pageForNotes) {
             var hasNotes = false;
             if ($axure.document.configuration.showPageNotes) {
@@ -38,7 +46,7 @@
                     //populate the page notes
                     var notes = pageOrMaster.notes;
                     if (notes && !$.isEmptyObject(notes)) {
-                        pageNoteUi += "<div class='notesPageNameHeader'>" + pageOrMaster.pageName + "</div>";
+                        pageNoteUi += "<div class='notesPageNameHeader'>" + escapeXSS(pageOrMaster.pageName) + "</div>";
 
                         var showNames = $axure.document.configuration.showPageNoteNames;
                         for(var noteName in notes) {
@@ -64,7 +72,7 @@
 
                 if (pageNoteUi.length > 0) {
                     pageNoteUi += "<div class='lineDivider'></div>";
-                    var pageNotesHeader = "<div id='pageNotesSectionHeader' class='notesSectionHeader pluginNameHeader'>Page Notes</div>";
+                    var pageNotesHeader = "<div id='pageNotesSectionHeader' class='notesSectionHeader pluginNameHeader'>Page notes</div>";
                     $('#pageNotesContent').append(pageNotesHeader + pageNoteUi);
                 }
             }
@@ -77,8 +85,8 @@
                         for (var i = 0; i < widgetNotes.length; i++) {
                             var widgetNote = widgetNotes[i];
                             widgetNoteUi += "<div class='widgetNoteContainer' data-id='" + widgetNote["ownerId"] + "'>";
-                            widgetNoteUi += "<div class='widgetNoteFootnote'>" + widgetNote["fn"] + "</div>";
-                            widgetNoteUi += "<div class='widgetNoteLabel'>" + widgetNote["label"] + "</div>";
+                            widgetNoteUi += "<div class='widgetNoteTitle'><div class='widgetNoteFootnote'>" + widgetNote["fn"] + "</div>";
+                            widgetNoteUi += "<div class='widgetNoteLabel'>" + widgetNote["label"] + "</div></div>";
 
                             for (var widgetNoteName in widgetNote) {
                                 if (widgetNoteName != "label" && widgetNoteName != "fn" && widgetNoteName != "ownerId") {
@@ -103,8 +111,7 @@
                 }
 
                 if (widgetNoteUi.length > 0) {
-                    var widgetNotesHeader = "<div id='widgetNotesSectionHeader' class='notesSectionHeader pluginNameHeader'>Widget Notes</div>";
-                    $('#pageNotesContent').append(widgetNotesHeader + widgetNoteUi);
+                    $('#pageNotesContent').append(widgetNoteUi);
 
                     //$('.widgetNoteContainer').children(':last-child').remove();
                     //$('.widgetNoteFootnote').append("<div class='annnoteline'></div><div class='annnoteline'></div><div class='annnoteline'></div>");
@@ -209,8 +216,8 @@
                 var widgetNote = widgetNotes[i];
                 if (widgetNote["ownerId"] == ownerId) {
                     widgetNoteUi += "<div class='widgetNoteContainer' data-id='" + widgetNote["ownerId"] + "'>";
-                    widgetNoteUi += "<div class='widgetNoteFootnote'>" + widgetNote["fn"] + "</div>";
-                    widgetNoteUi += "<div class='widgetNoteLabel'>" + widgetNote["label"] + "</div>";
+                    widgetNoteUi += "<div class='widgetNoteTitle'><div class='widgetNoteFootnote'>" + widgetNote["fn"] + "</div>";
+                    widgetNoteUi += "<div class='widgetNoteLabel'>" + widgetNote["label"] + "</div></div>";
 
                     for (var widgetNoteName in widgetNote) {
                         if (widgetNoteName != "label" && widgetNoteName != "fn" && widgetNoteName != "ownerId") {
@@ -451,20 +458,14 @@
     }
 
     function generatePageNotes() {
-        var pageNotesUi = "<div id='pageNotesHeader'>";
-
-        pageNotesUi += "<div id='pageNotesToolbar' style='height: 12px;'>";
-        pageNotesUi += "</div>";
-        pageNotesUi += "</div>";
-
-
+        var pageNotesUi = "<div id='pageNotesHeader'><div class='pluginNameHeader'>Widget notes</div></div>";
         pageNotesUi += "<div id='pageNotesScrollContainer'>";
         pageNotesUi += "<div id='pageNotesContainer'>";
-        pageNotesUi += "<div id='pageNotesEmptyState' class='emptyStateContainer'><div class='emptyStateTitle'>No notes for this page.</div><div class='emptyStateContent'>Notes added in Axure RP will appear here.</div><div class='dottedDivider'></div></div>";
+        pageNotesUi += "<div id='pageNotesEmptyState' class='emptyStateContainer'><div class='emptyStateTitle'>No notes</div><div class='emptyStateContent'>Notes added in Axure RP will appear here</div></div>";
         pageNotesUi += "<span id='pageNotesContent'></span>";
         pageNotesUi += "</div></div>";
 
-        $('#pageNotesHost').html(pageNotesUi);
+        $('#pageNotesHost').append(pageNotesUi);
 
         if(!$axure.document.configuration.showAnnotations) {
             $('#pageNotesHost .pageNameHeader').css('padding-right', '55px');

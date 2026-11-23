@@ -43,6 +43,8 @@ $axure.internal(function($ax) {
     $ax.public.fn.IsRepeater = function (type) { return type == $ax.constants.REPEATER_TYPE; }
     $ax.public.fn.IsDynamicPanel = $ax.IsDynamicPanel = function (type) { return type == $ax.constants.DYNAMIC_PANEL_TYPE; }
     $ax.public.fn.IsLayer = $ax.IsLayer = function (type) { return type == $ax.constants.LAYER_TYPE; }
+    $ax.public.fn.IsLayer2 = $ax.IsLayer2 = function (type) { return type == $ax.constants.LAYER_TYPE; }
+    $ax.public.fn.IsLayerOrRdo = $ax.IsLayerOrRdo = function (type) { return $ax.IsLayer2(type) || $ax.public.fn.IsReferenceDiagramObject(type); }
     $ax.public.fn.IsTextBox = function (type) { return type == $ax.constants.TEXT_BOX_TYPE; }
     $ax.public.fn.IsTextArea = function (type) { return type == $ax.constants.TEXT_AREA_TYPE; }
     $ax.public.fn.IsListBox = function (type) { return type == $ax.constants.LIST_BOX_TYPE; }
@@ -60,6 +62,13 @@ $axure.internal(function($ax) {
     $ax.public.fn.IsConnector = function (type) { return type == $ax.constants.CONNECTOR_TYPE; }
     $ax.public.fn.IsContainer = function (type) { return type== $ax.constants.VECTOR_SHAPE_TYPE || type == $ax.constants.TABLE_TYPE || type == $ax.constants.MENU_OBJECT_TYPE || type == $ax.constants.TREE_NODE_OBJECT_TYPE; }
 
+    var SET_OPACITY_TYES = [
+        $ax.constants.CHECK_BOX_TYPE, $ax.constants.RADIO_BUTTON_TYPE, $ax.constants.TEXT_BOX_TYPE,
+        $ax.constants.TEXT_AREA_TYPE, $ax.constants.LIST_BOX_TYPE, $ax.constants.COMBO_BOX_TYPE, $ax.constants.BUTTON_TYPE,
+        $ax.constants.IMAGE_BOX_TYPE, $ax.constants.IMAGE_MAP_REGION_TYPE, $ax.constants.VECTOR_SHAPE_TYPE, $ax.constants.REFERENCE_DIAGRAM_OBJECT_TYPE
+    ];
+    $ax.public.fn.SupportSetOpacity = function (type) { return $.inArray(type, SET_OPACITY_TYES) !== -1; }
+
     var PLAIN_TEXT_TYPES = [$ax.constants.TEXT_BOX_TYPE, $ax.constants.TEXT_AREA_TYPE, $ax.constants.LIST_BOX_TYPE,
         $ax.constants.COMBO_BOX_TYPE, $ax.constants.CHECK_BOX_TYPE, $ax.constants.RADIO_BUTTON_TYPE, $ax.constants.BUTTON_TYPE];
 
@@ -68,7 +77,20 @@ $axure.internal(function($ax) {
         $ax.constants.BUTTON_TYPE, $ax.constants.DYNAMIC_PANEL_TYPE, $ax.constants.IMAGE_BOX_TYPE, $ax.constants.IMAGE_MAP_REGION_TYPE,
         $ax.constants.INLINE_FRAME_TYPE, $ax.constants.LAYER_TYPE, $ax.constants.LIST_BOX_TYPE, $ax.constants.COMBO_BOX_TYPE,
         $ax.constants.VECTOR_SHAPE_TYPE, $ax.constants.TEXT_AREA_TYPE, $ax.constants.TEXT_BOX_TYPE, $ax.constants.SNAPSHOT_TYPE
+        //, $ax.constants.REFERENCE_DIAGRAM_OBJECT_TYPE
     ];
+
+    $ax.public.fn.IsSelectionButton = function(type) {
+        return type == $ax.constants.RADIO_BUTTON_TYPE || type == $ax.constants.CHECK_BOX_TYPE;
+    };
+
+    $ax.public.fn.SupportsErrorStyle = function(widgetType) {
+        return $ax.public.fn.IsImageBox(widgetType) || $ax.public.fn.IsVector(widgetType)
+            || $ax.public.fn.IsDynamicPanel(widgetType) || $ax.public.fn.IsLayerOrRdo(widgetType)
+            || $ax.public.fn.IsTextArea(widgetType) || $ax.public.fn.IsTextBox(widgetType)
+            || $ax.public.fn.IsListBox(widgetType) || $ax.public.fn.IsComboBox(widgetType)
+            || $ax.public.fn.IsCheckBox(widgetType) || $ax.public.fn.IsRadioButton(widgetType)
+    }
 
     $ax.public.fn.SupportsRichText = function() {
         var obj = $obj(this.getElementIds()[0]);
@@ -145,28 +167,39 @@ $axure.internal(function($ax) {
         return this;
     };
 
-    $ax.public.fn.SetPanelState = function(stateNumber, options, showWhenSet) {
+    $ax.public.fn.SetPanelState = function (stateNumber, options, eventInfo, showWhenSet) {
 
         var animateInInfo = _getAnimateInfo(options && options.animateIn, 500);
         var animateOutInfo = _getAnimateInfo(options && options.animateOut, 500);
 
         var elementIds = this.getElementIds();
 
-        for(var index = 0; index < elementIds.length; index++) {
+        for (var index = 0; index < elementIds.length; index++) {
             var elementId = elementIds[index];
             if ($ax.public.fn.IsDynamicPanel($ax.getTypeFromElementId(elementId))) {
-                var stateName = $ax.visibility.GetPanelStateId(elementId, Number(stateNumber) - 1);
+                var currentStateName = $ax.visibility.GetPanelState(elementId);
+                var newStateName = $ax.visibility.GetPanelStateId(elementId, Number(stateNumber) - 1);
                 var wasVisible = $ax.visibility.IsIdVisible(elementId);
+
+                $ax.dynamicPanelManager.setPanelSizeChange(elementId, currentStateName, newStateName);
+
+
+                var delta = NaN;
+                if (options.compress && options.compressDistanceType == "custom") {
+                    delta = Number($ax.expr.evaluateExpr(options.compressValue, eventInfo));
+                }
+
                 // If compressing because you are fit to content and the change of state may change size, must be before the change.
                 if(options.compress && $ax.dynamicPanelManager.isIdFitToContent(elementId) && wasVisible) {
-                    $ax.dynamicPanelManager.compressDelta(elementId, $ax.visibility.GetPanelState(elementId), stateName, options.vertical, options.compressEasing, options.compressDuration);
+                    $ax.dynamicPanelManager.compressDelta(elementId, currentStateName, newStateName, options.vertical, options.compressEasing, options.compressDuration, delta);
                 }
-                $ax.visibility.SetPanelState(elementId, stateName, animateOutInfo.easingType, animateOutInfo.direction, animateOutInfo.duration,
-                    animateInInfo.easingType, animateInInfo.direction, animateInInfo.duration, showWhenSet);
+                $ax.visibility.SetPanelState(elementId, newStateName, animateOutInfo, animateInInfo, showWhenSet);
                 // If compressing because of a show, must be after state is set.
                 if(options.compress && !wasVisible && showWhenSet) {
-                    $ax.dynamicPanelManager.compressToggle(elementId, options.vertical, true, options.compressEasing, options.compressDuration);
+                    $ax.dynamicPanelManager.compressToggle(elementId, options.vertical, true, options.compressEasing, options.compressDuration, delta);
                 }
+
+                $ax.dynamicPanelManager.clearPanelSizeChanges();
             }
         }
 
@@ -187,7 +220,10 @@ $axure.internal(function($ax) {
                 if(lightbox.length == 0) {
                     lightbox = $('<div></div>');
                     lightbox.attr('id', lightboxId);
-                    var color = 'rgb(' + options.lightbox.r + ',' + options.lightbox.g + ',' + options.lightbox.b + ')';
+                    var color = 'rgb(' + options.lightbox.r + ',' + options.lightbox.g + ',' + options.lightbox.b + ',' + options.lightbox.a / 255 + ')';
+                    var backdropFilter;
+                    if (options.lightboxBlur && options.lightboxBlur.on) backdropFilter = 'blur(' + options.lightboxBlur.radius + 'px)';
+                    else backdropFilter = 'none';
                     lightbox.css({
                         position: 'fixed',
                         left: '0px',
@@ -195,14 +231,14 @@ $axure.internal(function($ax) {
                         width: '10000px',
                         height: '10000px',
                         'background-color': color,
-                        opacity: options.lightbox.a / 255
+                        'backdrop-filter': backdropFilter,
                     });
 
-                    var parents = $ax('#' + elementId).getParents(true, ['dynamicPanel'])[0];
+                    var parents = $ax('#' + elementId).getParents(true, '*')[0];
                     var fixedParentPanelId = undefined;
                     for(var j = 0; j < parents.length; j++) {
                         var parentId = parents[j];
-                        if($jobj(parentId).css('z-index') != 'auto' || $ax.features.supports.mobile) {
+                        if ($ax.visibility.IsIdVisible(parentId) && ($jobj(parentId).css('z-index') != 'auto' || $ax.features.supports.mobile)) {
                             fixedParentPanelId = parents[j];
                             break;
                         }
@@ -249,30 +285,49 @@ $axure.internal(function($ax) {
     };
 
     var _getAnimateInfo = function (options, defaultDuration, useHide) {
-        var durationOption, easingOption, animationOption;
+        var durationOption, easingOption, animationOption, scale, scaleAnchor;
 
         if(options) {
             if (useHide) {
                 durationOption = options.durationHide;
                 easingOption = options.easingHide;
                 animationOption = options.animationHide;
+                scale = options.scaleHide;
+                scaleAnchor = options.scaleHideAnchor;
             } else {
                 durationOption = options.duration;
                 easingOption = options.easing;
                 animationOption = options.animation;
+                scale = options.scale;
+                scaleAnchor = options.scaleAnchor;
             }
             if (animationOption == 'none') animationOption = 'swing';
         } else {
             durationOption = defaultDuration;
             easingOption = 'none',
             animationOption = 'swing';
+            scale = useHide ? 0 : 1;
+            scaleAnchor = 'center';
         }
         var animateInfo = { duration: durationOption };
         switch (easingOption) {
         case 'fade':
             animateInfo.easingType = 'fade';
             animateInfo.direction = '';
+            animateInfo.animation = animationOption
             break;
+        case 'scale':
+            animateInfo.easingType = 'scale';
+            animateInfo.scale = scale;
+            animateInfo.scaleAnchor = scaleAnchor;
+            animateInfo.animation = animationOption
+            break;
+        case 'fadeAndScale':
+            animateInfo.easingType = 'fadeAndScale';
+            animateInfo.scale = scale;
+            animateInfo.scaleAnchor = scaleAnchor;
+            animateInfo.animation = animationOption
+            break
         case 'slideLeft':
             animateInfo.easingType = animationOption;
             animateInfo.direction = 'left';
@@ -337,12 +392,16 @@ $axure.internal(function($ax) {
         return this;
     };
 
+    var _shouldCompress = function (showType) {
+        return showType == 'compressVertical' || showType == 'compressRight'
+    }
+
     var _setVisibility = function (elementId, value, options, useHide) {
         var animateInfo = _getAnimateInfo(options, 0, useHide);
 
         var wasShown = $ax.visibility.IsIdVisible(elementId);
-        var compress = options && options.showType == 'compress' && wasShown != value;
-        if (compress) $ax.dynamicPanelManager.compressToggle(elementId, options.vertical, value, options.compressEasing, options.compressDuration);
+        var compress = options && _shouldCompress(options.showType) && wasShown != value;
+        if (compress) $ax.dynamicPanelManager.compressToggle(elementId, options.vertical, value, options.compressEasing, options.compressDuration, options.compressDelta ?? NaN);
 
         var onComplete = function () {
             $ax.dynamicPanelManager.fitParentPanel(elementId);
@@ -353,6 +412,8 @@ $axure.internal(function($ax) {
             direction: animateInfo.direction,
             duration: animateInfo.duration,
             animation: animateInfo.animation,
+            scale: animateInfo.scale,
+            scaleAnchor: animateInfo.scaleAnchor,
             fire: true,
             onComplete: onComplete
         });
@@ -365,21 +426,32 @@ $axure.internal(function($ax) {
             easing = 'none';
             duration = 0;
         }
+        function setOpacity(ids) {
+            for(var index = 0; index < ids.length; index++) {
+                var elementId = ids[index];
+                var obj = $obj(elementId);
+                var query = $jobj(elementId);
+                // set opacity of child elements recursively
+                if($ax.public.fn.IsLayer(obj.type)) {
+                    query.attr('layer-opacity', opacity);
+                    setOpacity(obj.objs.flatMap(o => o.scriptIds));
+                    $ax.action.removeAnimationFromQueue(elementId, $ax.action.queueTypes.fade);
+                } else if($ax.public.fn.SupportSetOpacity(obj.type)) {
+                    var onComplete = function () {
+                        $ax.action.fireAnimationFromQueue(elementId, $ax.action.queueTypes.fade);
+                    };
+                    
+                    if(duration == 0 || easing == 'none') {
+                        query.css('opacity', opacity);
+                        onComplete();
+                    } else query.animate({ opacity: opacity }, { duration: duration, easing: easing, queue: false, complete: onComplete });
+                }
+            }
+        }
 
         var elementIds = this.getElementIds();
-
-        for(var index = 0; index < elementIds.length; index++) {
-            var elementId = elementIds[index];
-            var onComplete = function() {
-                $ax.action.fireAnimationFromQueue(elementId, $ax.action.queueTypes.fade);
-            };
-
-            var query = $jobj(elementId);
-            if(duration == 0 || easing == 'none') {
-                query.css('opacity', opacity);
-                onComplete();
-            } else query.animate({ opacity: opacity }, { duration: duration, easing: easing, queue: false, complete: onComplete });
-        }
+        setOpacity(elementIds);
+        
     }
     //move one widget.  I didn't combine moveto and moveby, since this is in .public, and separate them maybe more clear for the user
     var _move = function (elementId, x, y, options, moveTo) {
@@ -409,6 +481,36 @@ $axure.internal(function($ax) {
         }
     };
 
+    $ax.public.fn.getCursorOffset = function (elementId) {
+        var cursorOffset = { x: 0, y: 0 };
+
+        var element = $ax('#' + elementId);
+        // element.getParents returns undefined if it has no parents
+        var dynamicPanelParents = element.getParents(true, 'dynamicPanel')[0] || [];
+        // repeater can be only one
+        var repeaterParents = element.getParents(false, 'repeater');
+        var relativeLocationParents = dynamicPanelParents.concat(repeaterParents);
+        var getParentOffset = function (elementId, parentId) {
+            var parentType = $ax.getTypeFromElementId(parentId);
+            if ($ax.public.fn.IsDynamicPanel(parentType)) {
+                return $ax('#' + parentId).offsetLocation();
+            }
+            if ($ax.public.fn.IsRepeater(parentType)) {
+                return $ax.repeater.getRepeaterElementOffset(parentId, elementId);
+            }
+            return { x: 0, y: 0 };
+        };
+        for (var i = 0; i < relativeLocationParents.length; i++) {
+            var parentId = relativeLocationParents[i];
+            if (parentId) {
+                var parentOffset = getParentOffset(elementId, parentId);
+                cursorOffset.x += parentOffset.x;
+                cursorOffset.y += parentOffset.y;
+            }
+        }
+        return cursorOffset;
+    }
+
     $ax.public.fn.moveTo = function (x, y, options) {
         var elementIds = this.getElementIds();
         for(var index = 0; index < elementIds.length; index++) {
@@ -425,14 +527,7 @@ $axure.internal(function($ax) {
             for(var i = 0; i < elementIds.length; i++) {
                 var elementId = elementIds[i];
                 $ax.move.nopMove(elementId, options);
-
-                //$ax.event.raiseSyntheticEvent(elementId, "onMove");
                 $ax.action.fireAnimationFromQueue(elementId, $ax.action.queueTypes.move);
-
-                //if($axure.fn.IsLayer($obj(elementId).type)) {
-                //    var childrenIds = $ax.public.fn.getLayerChildrenDeep(elementId, true);
-                //    for(var j = 0; j < childrenIds.length; j++) $ax.event.raiseSyntheticEvent(childrenIds[j], 'onMove');
-                //}
             }
             return this;
         }
@@ -487,6 +582,8 @@ $axure.internal(function($ax) {
 
         for(var index = 0; index < elementIds.length; index++) {
             var elementId = elementIds[index];
+            var oldBoundingRect = $ax('#' + elementId).offsetBoundingRect(true);
+            $ax.visibility.setResizingRect(elementId, oldBoundingRect);
 
             var obj = $obj(elementId);
             if(!$ax.public.fn.IsResizable(obj.type)) {
@@ -522,6 +619,7 @@ $axure.internal(function($ax) {
 
                     completeAndFire(moves, elementId);
                     $ax.event.raiseSyntheticEvent(elementId, 'onResize');
+                    $ax.visibility.clearResizingRects();
                 };
 
             } else {
@@ -561,12 +659,13 @@ $axure.internal(function($ax) {
 
                     $ax.annotation.adjustIconLocation(elementId);
                     $ax.event.raiseSyntheticEvent(elementId, 'onResize');
+                    $ax.visibility.clearResizingRects();
                 };
             }
 
-            var children = query.children().not('div.text');
+            var children = query.children().not('div.text, object.img');
             while(children && children.length && $(children[0]).attr('id').indexOf('container') != -1) {
-                children = children.children().not('div.text');
+                children = children.children().not('div.text, object.img');
             }
 
             if(children && children.length !== 0) {
@@ -581,7 +680,7 @@ $axure.internal(function($ax) {
                     //$ax.size() use outerWidth/Height(false), which include padding and borders(no margins)
                     var childSizingObj = $ax('#' + child.id).size();
                     var differentSizedImage = childSizingObj.width - oldWidth != 0 || childSizingObj.height - oldHeight != 0;
-                    if ((differentSizedImage || isConnector) && child.tagName == 'IMG') {
+                    if ((differentSizedImage || isConnector) && (child.tagName == 'IMG' || $(child).hasClass("bgImg"))) {
                         //oldwidth is zero for connectors
                         var widthOffset = oldWidth ? (childSizingObj.width - oldWidth) * newLocationAndSizeCss.width / oldWidth : childSizingObj.width;
                         var heightOffset = oldHeight ? (childSizingObj.height - oldHeight) * newLocationAndSizeCss.height / oldHeight : childSizingObj.height;
@@ -603,6 +702,22 @@ $axure.internal(function($ax) {
                     childAnimationArray.push({ obj: child, sizingObj: childSizingObj, sizingCss: childCss });
                 });
             }
+
+            var svgChildren = query.children('svg.img');
+            if(svgChildren && svgChildren.length !== 0) {
+                var childAnimationArray = [];
+                svgChildren.each(function (i, child) {
+                    child.style.transformOrigin = 'top left';
+                    var oldTransformMatrix = new WebKitCSSMatrix(window.getComputedStyle(child).transform);
+                    var oldScaleX = oldTransformMatrix.m11;
+                    var oldScaleY = oldTransformMatrix.m22;
+                    var scaleX = (newLocationAndSizeCss.width / oldWidth) * oldScaleX;
+                    var scaleY = (newLocationAndSizeCss.height / oldHeight) * oldScaleY;
+                    if(oldScaleX !== scaleX || oldScaleY !== scaleY) {
+                        childAnimationArray.push({obj: child, scaleX, scaleY, oldScaleX, oldScaleY });
+                    }
+                });
+            }
             
             if (newLocationAndSizeCss.left || newLocationAndSizeCss.top) {
                 //var movedLeft = newLocationAndSizeCss.left;
@@ -619,26 +734,15 @@ $axure.internal(function($ax) {
             }
 
             if (!resizeInfo.easing || resizeInfo.easing == 'none') {
-                query.animate(newLocationAndSizeCss, 0);
-
                 if (childAnimationArray) {
                     $(childAnimationArray).each(function (i, animationObj) {
                         if(animationObj.resizeMatrixFunction) {
                             $(animationObj.obj).css($ax.public.fn.setTransformHowever(animationObj.resizeMatrixFunction(animationObj.width, animationObj.height)));
+                        } else if(animationObj.scaleX !== undefined) {
+                            animationObj.obj.style.transform = 'Scale(' + animationObj.scaleX + ', ' + animationObj.scaleY + ')';
                         } else {
-                            //var sizingCss = animationObj.sizingCss;
-                            //if (sizingCss.left || sizingCss.top) {
-                            //    var movedLeft = sizingCss.left;
-                            //    var movedTop = sizingCss.top;
-                            //    $ax.visibility.setMovedLocation(animationObj.obj.id, movedLeft, movedTop);
-                            //}
-                            //if (sizingCss.width || sizingCss.height) {
-                            //    var resizedWidth = sizingCss.width;
-                            //    var resizedHeight = sizingCss.height;
-                            //    $ax.visibility.setResizedSize(animationObj.obj.id, resizedWidth, resizedHeight);
-                            //}
-
-                            $(animationObj.obj).animate(animationObj.sizingCss, 0);
+                            $(animationObj.obj).css(animationObj.sizingCss);
+                            // $(animationObj.obj).animate(animationObj.sizingCss, { queue: false, duration: 0 });
                         }
                     });
                 }
@@ -650,7 +754,9 @@ $axure.internal(function($ax) {
                 //        step: textStepFunction
                 //    });
                 //}
+                query.css(newLocationAndSizeCss);
                 onComplete();
+                // query.animate(newLocationAndSizeCss, { queue: false, duration: 0, complete: onComplete });
             } else {
                 if(childAnimationArray) {
                     $(childAnimationArray).each(function (i, animationObj) {
@@ -664,6 +770,17 @@ $axure.internal(function($ax) {
                                     var heightRatio = (animationObj.height - 1.0) * now + 1.0;
                                     $(animationObj.obj).css($ax.public.fn.setTransformHowever(animationObj.resizeMatrixFunction(widthRatio, heightRatio)));
                                 }
+                            });
+                        } else if(animationObj.scaleX !== undefined) {
+                            $({ offset: 0 }).animate({ offset: 1 }, {
+                                duration: resizeInfo.duration,
+                                easing: resizeInfo.easing,
+                                queue: false,
+                                step: function (now, fx) {
+                                    var scaleX = (animationObj.scaleX - animationObj.oldScaleX) * now + animationObj.oldScaleX;
+                                    var scaleY = (animationObj.scaleY - animationObj.oldScaleY) * now + animationObj.oldScaleY;
+                                    animationObj.obj.style.transform = 'Scale(' + scaleX + ', ' + scaleY + ')';
+                                },
                             });
                         } else {
                             $(animationObj.sizingObj).animate(animationObj.sizingCss, {
@@ -909,7 +1026,7 @@ $axure.internal(function($ax) {
 
         var viewportLocation;
         if ($scrollable.is('body')) viewportLocation = $ax('#' + id).viewportLocation();
-        else viewportLocation = $ax('#' + id).pageBoundingRect(true, $scrollable.attr('id')).location;
+        else viewportLocation = $ax('#' + id).pageBoundingRect(true, $scrollable.attr('id'), true).location;
 
         var targetLeft = viewportLocation.left;
         var targetTop = viewportLocation.top;
@@ -973,9 +1090,9 @@ $axure.internal(function($ax) {
             if(!firstId) return undefined;
 
             var widgetType = $ax.getTypeFromElementId(firstId);
-            if ($ax.public.fn.IsImageBox(widgetType) || $ax.public.fn.IsVector(widgetType)
-                || $ax.public.fn.IsLayer(widgetType)) return !$ax.style.IsWidgetDisabled(firstId);
-            else return this.jQuery().children(':disabled').length <= 0;
+            if($ax.public.fn.IsImageBox(widgetType) || $ax.public.fn.IsVector(widgetType)
+                || $ax.public.fn.IsLayerOrRdo(widgetType)) return !$ax.style.IsWidgetDisabled(firstId);
+            else return this.jQuery().children(':disabled').length <= 0 && this.jQuery().children('.disabled').length <= 0;
         } else {
             var elementIds = this.getElementIds();
 
@@ -990,7 +1107,7 @@ $axure.internal(function($ax) {
                     || $ax.public.fn.IsCheckBox(widgetType) || $ax.public.fn.IsRadioButton(widgetType)
                 ) $ax.style.SetWidgetEnabled(elementId, enabled);
 
-                if ($ax.public.fn.IsDynamicPanel(widgetType) || $ax.public.fn.IsLayer(widgetType)) {
+                if($ax.public.fn.IsDynamicPanel(widgetType) || $ax.public.fn.IsLayerOrRdo(widgetType)) {
                     $ax.style.SetWidgetEnabled(elementId, enabled);
                     var children = this.getChildren(false, true)[index].children;
                     for(var i = 0; i < children.length; i++) {
@@ -1010,7 +1127,7 @@ $axure.internal(function($ax) {
                 if(input.length) jobj = input;
 
                 //if (OS_MAC && WEBKIT && $ax.public.fn.IsComboBox(widgetType)) jobj.css('color', enabled ? '' : 'grayText');
-
+                if($ax.public.fn.IsCheckBox(widgetType) || $ax.public.fn.IsRadioButton(widgetType)) return this;
                 if(enabled) jobj.prop('disabled', false);
                 else jobj.prop('disabled', true);
             }
@@ -1024,6 +1141,42 @@ $axure.internal(function($ax) {
         for(var index = 0; index < ids.length; index++) $ax.visibility.SetIdVisible(ids[index], arguments[0]);
         return this;
     };
+
+    $ax.public.fn.error = function () {
+        if(arguments[0] == undefined) {
+            var firstId = this.getElementIds()[0];
+            if(!firstId) return undefined;
+            //check for error
+            var widgetType = $ax.getTypeFromElementId(firstId);
+            if($ax.public.fn.SupportsErrorStyle(widgetType)) {
+                return $ax.style.IsWidgetError(firstId);
+            }
+        } else {
+            var elementIds = this.getElementIds();
+
+            for(var index = 0; index < elementIds.length; index++) {
+                var elementId = elementIds[index];
+                var widgetType = $ax.getTypeFromElementId(elementId);
+
+                var error = arguments[0];
+                if($ax.public.fn.IsImageBox(widgetType) || $ax.public.fn.IsVector(widgetType)
+                    || $ax.public.fn.IsTextBox(widgetType) || $ax.public.fn.IsTextArea(widgetType)
+                    || $ax.public.fn.IsComboBox(widgetType) || $ax.public.fn.IsListBox(widgetType)
+                    || $ax.public.fn.IsCheckBox(widgetType) || $ax.public.fn.IsRadioButton(widgetType)
+                ) $ax.style.SetWidgetError(elementId, error);
+
+                if($ax.public.fn.IsDynamicPanel(widgetType) || $ax.public.fn.IsLayerOrRdo(widgetType)) {
+                    $ax.style.SetWidgetError(elementId, error);
+                    var children = this.getChildren(false, true)[index].children;
+                    for(var i = 0; i < children.length; i++) {
+                        $axure('#' + children[i]).error(error);
+                    }
+                }
+            }
+            return this;
+        }
+    }
+
 
     $ax.public.fn.selected = function() {
         if(arguments[0] == undefined) {
@@ -1046,7 +1199,8 @@ $axure.internal(function($ax) {
 
                 if(treeNodeButtonShapeId == '') return undefined;
                 return $ax.style.IsWidgetSelected(treeNodeButtonShapeId);
-            } else if ($ax.public.fn.IsImageBox(widgetType) || $ax.public.fn.IsVector(widgetType) || $ax.public.fn.IsTableCell(widgetType) || $ax.public.fn.IsDynamicPanel(widgetType) || $ax.public.fn.IsLayer(widgetType)) {
+            } else if($ax.public.fn.IsImageBox(widgetType) || $ax.public.fn.IsVector(widgetType) || $ax.public.fn.IsTableCell(widgetType) || $ax.public.fn.IsDynamicPanel(widgetType) || $ax.public.fn.IsLayerOrRdo(widgetType)
+                || $ax.public.fn.IsTextArea(widgetType) || $ax.public.fn.IsTextBox(widgetType) || $ax.public.fn.IsListBox(widgetType) || $ax.public.fn.IsComboBox(widgetType)) {
                 return $ax.style.IsWidgetSelected(firstId);
             } else if ($ax.public.fn.IsCheckBox(widgetType) || $ax.public.fn.IsRadioButton(widgetType)) {
                 return $jobj($ax.INPUT(firstId)).prop('checked');
@@ -1084,7 +1238,8 @@ $axure.internal(function($ax) {
                 if(treeNodeButtonShapeId == '') continue;
 
                 $ax.tree.SelectTreeNode(elementId, enabled);
-            } else if ($ax.public.fn.IsImageBox(widgetType) || $ax.public.fn.IsVector(widgetType) || $ax.public.fn.IsVector(widgetType) || $ax.public.fn.IsTableCell(widgetType) || $ax.public.fn.IsDynamicPanel(widgetType) || $ax.public.fn.IsLayer(widgetType)) {
+            } else if($ax.public.fn.IsImageBox(widgetType) || $ax.public.fn.IsVector(widgetType) || $ax.public.fn.IsTableCell(widgetType) || $ax.public.fn.IsDynamicPanel(widgetType) || $ax.public.fn.IsLayerOrRdo(widgetType)
+                || $ax.public.fn.IsTextArea(widgetType) || $ax.public.fn.IsTextBox(widgetType) || $ax.public.fn.IsListBox(widgetType) || $ax.public.fn.IsComboBox(widgetType)) {
                 $ax.style.SetWidgetSelected(elementIds[index], enabled);
             } else if ($ax.public.fn.IsCheckBox(widgetType) || $ax.public.fn.IsRadioButton(widgetType)) {
                 var query = $jobj($ax.INPUT(elementId));
@@ -1093,7 +1248,6 @@ $axure.internal(function($ax) {
                 if(curr != enabled) {
                     query.prop('checked', enabled);
                     $ax.style.SetWidgetSelected(elementIds[index], enabled, true);
-                    $ax.event.TryFireCheckChanged(elementId, enabled);
                 }
             }
         }
@@ -1142,7 +1296,7 @@ $axure.internal(function($ax) {
         }
     };
 
-    var _populateBoundingRect = function (boundingRect) {
+    var _populateBoundingRect = function(boundingRect) {
         boundingRect.right = boundingRect.left + boundingRect.width;
         boundingRect.bottom = boundingRect.top + boundingRect.height;
 
@@ -1168,87 +1322,9 @@ $axure.internal(function($ax) {
         return boundingRect;
     }
 
-    //boundingrect relative to its offset parent
-    //var _getBoundingRectForSingleWidget = function (elementId) {
-    //    var element = document.getElementById(elementId);
-    //    var tempBoundingRect, position;
-
-    //    var state = $ax.style.generateState(elementId);
-    //    var style = $ax.style.computeFullStyle(elementId, state, $ax.adaptive.currentViewId);
-    //    position = { left: style.location.x, top: style.location.y };
-    //    tempBoundingRect = { left: style.location.x, top: style.location.y, width: style.size.width, height: style.size.height };
-
-    //    if ($ax.public.fn.isCompoundVectorHtml(element)) {
-    //        tempBoundingRect.width = Number(element.getAttribute('data-width'));
-    //        tempBoundingRect.height = Number(element.getAttribute('data-height'));
-    //    } else {
-    //        var boundingElement = element;
-    //        if ($ax.dynamicPanelManager.isIdFitToContent(elementId)) {
-    //            var stateId = $ax.visibility.GetPanelState(elementId);
-    //            if (stateId != '') boundingElement = document.getElementById(stateId);
-    //            tempBoundingRect = boundingElement.getBoundingClientRect();
-    //        }
-
-    //        //From getLoc
-    //        //var fixed = _fixedOffset(id, vert);
-    //        //if (fixed.valid) loc = !vert && fixed.fullWidth ? 0 : fixed.offset;
-
-    //        var jElement = $(element);
-    //        if (jElement.css('position') == 'fixed') {
-    //            position = jElement.position();
-    //            position.left += Number(jElement.css('margin-left').replace("px", ""));
-    //            position.top += Number(jElement.css('margin-top').replace("px", ""));
-    //        }
-    //    }
-        
-    //    var boundingRect = {
-    //        left: position.left,
-    //        top: position.top,
-    //        width: tempBoundingRect.width,
-    //        height: tempBoundingRect.height
-    //    };
-        
-    //    return _populateBoundingRect(boundingRect);
-    //};
-
-    //var _getBoundingRectForMultipleWidgets = function (widgetsIdArray) {
-    //    if (!widgetsIdArray || widgetsIdArray.constructor !== Array) return undefined;
-    //    if (widgetsIdArray.length == 0) return { left: 0, top: 0, centerPoint: { x: 0, y: 0 }, width: 0, height: 0 };
-    //    var widgetRect = _getBoundingRectForSingleWidget(widgetsIdArray[0]);
-    //    var boundingRect = { left: widgetRect.left, right: widgetRect.right, top: widgetRect.top, bottom: widgetRect.bottom };
-
-    //    for (var index = 1; index < widgetsIdArray.length; index++) {
-    //        widgetRect = _getBoundingRectForSingleWidget(widgetsIdArray[index]);
-    //        boundingRect.left = Math.min(boundingRect.left, widgetRect.left);
-    //        boundingRect.top = Math.min(boundingRect.top, widgetRect.top);
-    //        boundingRect.right = Math.max(boundingRect.right, widgetRect.right);
-    //        boundingRect.bottom = Math.max(boundingRect.bottom, widgetRect.bottom);
-    //    }
-
-    //    boundingRect.centerPoint = { x: (boundingRect.right + boundingRect.left) / 2.0, y: (boundingRect.bottom + boundingRect.top) / 2.0 };
-    //    boundingRect.width = boundingRect.right - boundingRect.left;
-    //    boundingRect.height = boundingRect.bottom - boundingRect.top;
-    //    return _populateBoundingRect(boundingRect);
-    //};
-
-    //var _getLayerChildrenDeep = $ax.public.fn.getLayerChildrenDeep = function (layerId, includeLayers, includeHidden) {
-    //    var deep = [];
-    //    var children = $ax('#' + layerId).getChildren()[0].children;
-    //    for (var index = 0; index < children.length; index++) {
-    //        var childId = children[index];
-    //        if (!includeHidden && !$ax.visibility.IsIdVisible(childId)) continue;
-    //        if ($ax.public.fn.IsLayer($obj(childId).type)) {
-    //            if (includeLayers) deep.push(childId);
-    //            var recursiveChildren = _getLayerChildrenDeep(childId, includeLayers, includeHidden);
-    //            for (var j = 0; j < recursiveChildren.length; j++) deep.push(recursiveChildren[j]);
-    //        } else deep.push(childId);
-    //    }
-    //    return deep;
-    //};
-
     var _boundingRectForIds = function(childIds) {
         // Default size
-        var childrenBoundingRect = { left: childIds.length > 0 ? 9999999 : 0, top: childIds.length > 0 ? 9999999 : 0, right: 0, bottom: 0 };
+        var childrenBoundingRect = { left: childIds.length > 0 ? 99999 : 0, top: childIds.length > 0 ? 99999 : 0, right: 0, bottom: 0 };
         for (var i = 0; i < childIds.length; i++) {
             var childId = childIds[i];
             var childObj = $obj(childId);
@@ -1298,7 +1374,7 @@ $axure.internal(function($ax) {
         var axObj = $obj(elementId);
         if (!axObj || !axObj.fixedVertical) return { valid: false };
 
-        var win = $(window);
+        var win = ((SAFARI && IOS) || SHARE_APP) ? $('#ios-safari-html') : $(window);
         var windowWidth = win.width();
         var windowHeight = win.height();
         //getting the scroll forces layout. consider caching these values.
@@ -1332,8 +1408,34 @@ $axure.internal(function($ax) {
         return { valid: true, top: newTop, left: axObj.isPercentWidthPanel ? 0 : newLeft };
     };
 
-    //relative to the parent
-    $ax.public.fn.offsetBoundingRect = function (ignoreRotation) {
+    //relative to the parent component
+    $ax.public.fn.offsetBoundingRectToComponent = function() {
+        var offsetBoundingRect = this.offsetBoundingRect();
+
+        var parentComponentLoc = {top: 0, left: 0};
+        var parents = this.getParents(true, '*')[0];
+        for(var i = 0; i < parents.length; i++) {
+            var parentId = parents[i];
+            var type = $ax.getTypeFromElementId(parentId);
+            if ($axure.fn.IsReferenceDiagramObject(type)) {
+                parentComponentLoc = $ax('#' + parentId).offsetLocation();
+                break;
+            } else if (!$axure.fn.IsLayer(type)) break;
+        }
+
+        var boundingRect = {
+            left: offsetBoundingRect.left - parentComponentLoc.left,
+            top: offsetBoundingRect.top - parentComponentLoc.top,
+            width: offsetBoundingRect.width,
+            height: offsetBoundingRect.height,
+            isFixed: offsetBoundingRect.isFixed
+        };
+
+        return _populateBoundingRect(boundingRect);
+    }
+
+    //relative to the parent state or page
+    $ax.public.fn.offsetBoundingRect = function (ignoreRotation, ignoreOuterShadow, ignorePosition) {
         var elementId = this.getElementIds()[0];
         if (!elementId) return undefined;
         
@@ -1343,48 +1445,69 @@ $axure.internal(function($ax) {
         var position, size, rotation;
 
         var trap;
+        var displayObj;
         var state;
         var style;
         var movedLoc = $ax.visibility.getMovedLocation(elementId);
         var resizedSize = $ax.visibility.getResizedSize(elementId);
         
-        if (movedLoc) {
-            position = movedLoc;
-        } else if(element && element.getAttribute('data-left')) {
-            position = {
-                left: Number(element.getAttribute('data-left')),
-                top: Number(element.getAttribute('data-top'))
-            };
-        } else if($obj(elementId)) {
-            state = $ax.style.generateState(elementId);
-            style = $ax.style.computeFullStyle(elementId, state, $ax.adaptive.currentViewId);
-            position = { left: style.location.x, top: style.location.y };
-
-            var parents = this.getParents(true, '*')[0];
-            //if(parents.length > 0) {
-            //    var parentId = parents[0];
-            //    var type = $ax.getTypeFromElementId(parentId);
-            //    if ($axure.fn.IsReferenceDiagramObject(type)) {
-            //        var rdoLoc = $ax('#' + parentId).offsetLocation();
-            //        position.left += rdoLoc.x;
-            //        position.top += rdoLoc.y;
-            //    }
-            //}
-            for(var i = 0; i < parents.length; i++) {
-                var parentId = parents[i];
-                var type = $ax.getTypeFromElementId(parentId);
-                if ($axure.fn.IsReferenceDiagramObject(type)) {
-                    var rdoLoc = $ax('#' + parentId).offsetLocation();
-                    position.left += rdoLoc.x;
-                    position.top += rdoLoc.y;
-                    break;
-                } else if (!$axure.fn.IsLayer(type)) break;
+        var initTrapIfNeeded = function() {
+            if(!trap) {
+                var trimmedId = $ax.repeater.removeSuffixFromElementId(elementId);
+                if(ignorePosition) {
+                    var values = $ax.expr.displayWidgetIfNeeded(trimmedId);
+                    displayObj = trimmedId == elementId ? values.jObject : values.jObject.find('#' + elementId);
+                    trap = values.trap;
+                } else {
+                    displayObj = $(element);
+                    trap = $ax.expr.displayWidgetAndParents(trimmedId);
+                }
             }
-        } else {
-            if (!trap) trap = _displayWidget($ax.repeater.removeSuffixFromElementId(elementId));
-            var jObjPosition = $(element).position();
-            position = { left: jObjPosition.left, top: jObjPosition.top };
         }
+
+        if (!ignorePosition) {
+            if (movedLoc) {
+                position = movedLoc;
+            } else if(element && element.getAttribute('data-left')) {
+                position = {
+                    left: Number(element.getAttribute('data-left')),
+                    top: Number(element.getAttribute('data-top'))
+                };
+            } else if($obj(elementId)) {
+                state = $ax.style.generateState(elementId);
+                style = $ax.style.computeFullStyle(elementId, state, $ax.adaptive.currentViewId);
+                position = { left: style.location.x, top: style.location.y };
+
+                var oShadow = style.outerShadow;
+
+                if (oShadow.on && !ignoreOuterShadow) {
+                    if (oShadow.offsetX < 0) {
+                        position.left += oShadow.offsetX;
+                        position.left -= oShadow.blurRadius;
+                    }
+                    if (oShadow.offsetY < 0) {
+                        position.top += oShadow.offsetY;
+                        position.top -= oShadow.blurRadius;
+                    }
+                }
+
+                var parents = this.getParents(true, '*')[0];
+                for(var i = 0; i < parents.length; i++) {
+                    var parentId = parents[i];
+                    var type = $ax.getTypeFromElementId(parentId);
+                    if ($axure.fn.IsReferenceDiagramObject(type)) {
+                        var rdoLoc = $ax('#' + parentId).offsetLocation();
+                        position.left += rdoLoc.x;
+                        position.top += rdoLoc.y;
+                        break;
+                    } else if (!$axure.fn.IsLayer(type)) break;
+                }
+            } else {
+                initTrapIfNeeded();
+                var jObjPosition = displayObj.position();
+                position = { left: jObjPosition.left, top: jObjPosition.top };
+            }
+        } else position = { left: 0, top: 0 };
 
         if (resizedSize) {
             size = resizedSize;
@@ -1397,10 +1520,21 @@ $axure.internal(function($ax) {
             state = state || $ax.style.generateState(elementId);
             style = style || $ax.style.computeFullStyle(elementId, state, $ax.adaptive.currentViewId);
             size = { width: style.size.width, height: style.size.height };
+
+            var oShadow = style.outerShadow;
+
+            if (oShadow.on && !ignoreOuterShadow) {
+                if (oShadow.offsetX < 0) size.width -= oShadow.offsetX;
+                else size.width += oShadow.offsetX;
+                if (oShadow.offsetY < 0) size.height -= oShadow.offsetY;
+                else size.height += oShadow.offsetY;
+
+                size.width += oShadow.blurRadius;
+                size.height += oShadow.blurRadius;
+            }
         } else {
-            if(!trap) trap = _displayWidget($ax.repeater.removeSuffixFromElementId(elementId));
-            var jObj = $(element);
-            size = { width: jObj.outerWidth(), height: jObj.outerHeight() };
+            initTrapIfNeeded();
+            size = { width: displayObj.outerWidth(), height: displayObj.outerHeight() };
         }
         
         var fixed = _fixedLocation(elementId, size);
@@ -1428,8 +1562,8 @@ $axure.internal(function($ax) {
                 style = style || $ax.style.computeFullStyle(elementId, state, $ax.adaptive.currentViewId);
                 rotation = style.rotation;
             } else {
-                if (!trap) trap = _displayWidget($ax.repeater.removeSuffixFromElementId(elementId));
-                rotation = $ax.move.getRotationDegreeFromElement(element);
+                initTrapIfNeeded();
+                rotation = $ax.move.getRotationDegreeFromElement(displayObj[0]);
             }
             if(rotation && rotation != 0)
                 boundingRect = $ax.public.fn.getBoundingRectForRotate(_populateBoundingRect(boundingRect), rotation);
@@ -1441,28 +1575,14 @@ $axure.internal(function($ax) {
     };
 
     //relative to the page
-    $ax.public.fn.pageBoundingRect = function (ignoreRotation, scrollableId) {
-        var boundingRect = this.offsetBoundingRect(ignoreRotation);
+    $ax.public.fn.pageBoundingRect = function (ignoreRotation, scrollableId, ignoreOuterShadow) {
+        var boundingRect = this.offsetBoundingRect(ignoreRotation, ignoreOuterShadow);
         if(!boundingRect) return undefined;
 
         if(boundingRect.isFixed) return _populateBoundingRect(boundingRect);
 
         var loc = boundingRect.location;
-
-        //var parents = [];
-        //var parObj = id.indexOf('text') != -1 ? axObj : axObj.parent; // When working with text id, parent widget is the ax obj we are dealing with, so that should be the first parent
-        //while ($ax.public.fn.IsContainer(parObj.type)) {
-        //    parents.push($ax.getScriptIdFromPath([parObj.id], strippedId));
-        //    parObj = parObj.parent;
-        //}
-        //var otherParents = $ax('#' + id).getParents(true, ['item', 'repeater', 'dynamicPanel', 'layer'])[0];
-        //for (var i = 0; i < otherParents.length; i++) {
-        //    parents.push(otherParents[i]);
-        //}
-
         var elementId = this.getElementIds()[0];
-        //    var strippedId = $ax.repeater.removeSuffixFromElementId(id);
-        //        var parObj = id.indexOf('text') != -1 ? axObj : axObj.parent; // When working with text id, parent widget is the ax obj we are dealing with, so that should be the first parent
         var parentIds = [];
         var parObj = $obj(elementId).parent;
         while ($ax.public.fn.IsContainer(parObj.type)) {
@@ -1476,17 +1596,6 @@ $axure.internal(function($ax) {
 
         var parentScrollableId = scrollableId ? scrollableId.split('_')[0] : scrollableId;
         for (var i = 0; i < parentIds.length; i++) {
-            //var parentId = $ax.visibility.getWidgetFromContainer(parents[0]);
-            //var parent = $ax.visibility.applyWidgetContainer(parentId, true);
-            //if(parent.length) {
-            //var parentId = parentIds[i];
-            //var fixed = _fixedOffset(parentId, vert);
-            //if (fixed.valid) {
-            //    loc += fixed.offset;
-            //    break;
-            //} else loc += $ax.getNumFromPx(parent.css(prop));
-            //}
-            
             var parentId = parentIds[i];
             if (parentId == parentScrollableId) break;
             var parentLoc = $ax('#' + parentId).offsetLocation();
@@ -1516,60 +1625,19 @@ $axure.internal(function($ax) {
         return _populateBoundingRect(boundingRect);
     }
 
-    $ax.public.fn.size = function () {
-        var boundingRect = this.offsetBoundingRect(true);
+    $ax.public.fn.size = function ({ ignoreRotation = true, ignoreOuterShadow = true } = {}) {
+        var boundingRect = this.offsetBoundingRect(ignoreRotation, ignoreOuterShadow, true);
         return boundingRect ? boundingRect.size : undefined;
-
-        //var firstId = this.getElementIds()[0];
-        //if(!firstId) return undefined;
-
-        //var object = $ax.getObjectFromElementIdDisregardHex(firstId);
-        //if(object && (object.type == 'layer' || object.generateCompound)) {
-        //    var boundingRect = $ax.public.fn.getWidgetBoundingRect(firstId);
-        //    return { width: boundingRect.width, height: boundingRect.height };
-        //}
-
-        //var firstIdObject = $jobj(firstId);
-        //var trap = _displayWidget($ax.repeater.removeSuffixFromElementId(firstId));
-        //var size = { width: firstIdObject.outerWidth(), height: firstIdObject.outerHeight() };
-        //trap();
-        //return size;
     };
 
     $ax.public.fn.width = function () {
-        var boundingRect = this.offsetBoundingRect(true);
+        var boundingRect = this.offsetBoundingRect(true, false, true);
         return boundingRect ? boundingRect.width : undefined;
-
-        //var firstId = this.getElementIds()[0];
-        //if(!firstId) return undefined;
-
-        //var object = $ax.getObjectFromElementIdDisregardHex(firstId);
-        //if (object && (object.type == 'layer' || object.generateCompound)) {
-        //    var boundingRect = $ax.public.fn.getWidgetBoundingRect(firstId);
-        //    return boundingRect.width;
-        //}
-
-        //var firstIdObject = $jobj(firstId);
-
-        //return firstIdObject.outerWidth();
     };
 
     $ax.public.fn.height = function () {
-        var boundingRect = this.offsetBoundingRect(true);
+        var boundingRect = this.offsetBoundingRect(true, false, true);
         return boundingRect ? boundingRect.height : undefined;
-
-        //var firstId = this.getElementIds()[0];
-        //if(!firstId) return undefined;
-
-        //var object = $ax.getObjectFromElementIdDisregardHex(firstId);
-        //if (object && (object.type == 'layer' || object.generateCompound)) {
-        //    var boundingRect = $ax.public.fn.getWidgetBoundingRect(firstId);
-        //    return boundingRect.height;
-        //}
-
-        //var firstIdObject = $jobj(firstId);
-
-        //return firstIdObject.outerHeight();
     };
 
     //this should replace locRelativeIgnoreLayer
@@ -1578,50 +1646,10 @@ $axure.internal(function($ax) {
         return boundingRect ? boundingRect.location : undefined;
     };
 
-    //$ax.public.fn.offsetLeft = function () {
-    //    var boundingRect = this.offsetBoundingRect();
-    //    return boundingRect ? boundingRect.left : undefined;
-    //};
-
-    //$ax.public.fn.offsetTop = function () {
-    //    var boundingRect = this.offsetBoundingRect();
-    //    return boundingRect ? boundingRect.top : undefined;
-    //};
-
     $ax.public.fn.viewportLocation = function (scrollableId) {
         var boundingRect = this.viewportBoundingRect(scrollableId);
         return boundingRect ? boundingRect.location : undefined;
     };
-
-    //$ax.public.fn.pageLeft = function () {
-    //    var boundingRect = this.pageBoundingRect();
-    //    return boundingRect ? boundingRect.left : undefined;
-    //};
-
-    //$ax.public.fn.pageTop = function () {
-    //    var boundingRect = this.pageBoundingRect();
-    //    return boundingRect ? boundingRect.top : undefined;
-    //};
-
-    //This is getting its position in the Editor
-    //It was needed because the widget would be contained so getting the position from jQuery would not be accurate
-    //This can use the editor values
-    //$ax.public.fn.locRelativeIgnoreLayer = function (vert) {
-    //    var elementId = this.getElementIds()[0];
-    //    if(!elementId) return undefined;
-
-    //    var parents = this.getParents(true, '*')[0];
-
-    //    for(var i = 0; i < parents.length; i++) {
-    //        var type = $ax.getTypeFromElementId(parents[i]);
-    //        if(!$axure.fn.IsLayer(type) && !$axure.fn.IsReferenceDiagramObject(type)) {
-    //            var func = vert ? _getRelativeTop : _getRelativeLeft;
-    //            return func(elementId, $jobj(parents[i])[0]);
-    //        }
-    //    }
-    //    var axThis = $ax('#' + elementId);
-    //    return vert ? axThis.top() : _bodyToWorld(axThis.left(), true);
-    //};
 
     var _bodyToWorld = $axure.fn.bodyToWorld = function(x, from) {
         var body = $('body');
@@ -1633,174 +1661,9 @@ $axure.internal(function($ax) {
 
     $ax.public.fn.left = function (relative) {
         return relative ? this.offsetLocation().left : this.viewportLocation().left;
-
-        //var firstId = this.getElementIds()[0];
-        //if(!firstId) return undefined;
-
-        //var left = _getLoc(firstId, false, false, relative);
-
-        //// If you are absolute, unless your are a pinned panel...
-        //if(relative || $obj(firstId) && $obj(firstId).fixedVertical) return left;
-
-        //// ... or you are in one...
-        //var parentPanels = $ax('#' + firstId).getParents(true, 'dynamicPanel')[0];
-        //for(var i = 0; i < parentPanels.length; i++) if ($obj(parentPanels[i]).fixedVertical) return left;
-
-        //// ... you must convert from body to world coordinates
-        //return _bodyToWorld(left);
     };
 
     $ax.public.fn.top = function(relative) {
         return relative ? this.offsetLocation().top : this.viewportLocation().top;
-
-        //var firstId = this.getElementIds()[0];
-        //return firstId && _getLoc(firstId, true, false, relative);
     };
-
-    //var _getLoc = function(id, vert, high, relative) {
-    //    var mathFunc = high ? 'max' : 'min';
-    //    var prop = vert ? 'top' : 'left';
-    //    var dim = vert ? 'height' : 'width';
-
-    //    var obj = $jobj(id);
-    //    var strippedId = $ax.repeater.removeSuffixFromElementId(id);
-    //    var axObj = $obj(strippedId);
-    //    var oldDisplay = obj.css('display');
-    //    var displaySet = false;
-    //    if(oldDisplay == 'none') {
-    //        obj.css('display', '');
-    //        displaySet = true;
-    //    }
-    //    var loc = Math.NaN;
-    //    var rdo = axObj.type == $ax.constants.REFERENCE_DIAGRAM_OBJECT_TYPE;
-
-    //    if (!rdo) loc = $ax.getNumFromPx(obj.css(prop));
-
-    //    var fixed = _fixedOffset(id, vert);
-    //    if(fixed.valid) loc = !vert && fixed.fullWidth ? 0 : fixed.offset;
-    //    else if (!relative) {
-    //        var parents = [];
-    //        var parObj = id.indexOf('text') != -1 ? axObj : axObj.parent; // When working with text id, parent widget is the ax obj we are dealing with, so that should be the first parent
-    //        while($ax.public.fn.IsContainer(parObj.type)) {
-    //            parents.push($ax.getScriptIdFromPath([parObj.id], strippedId));
-    //            parObj = parObj.parent;
-    //        }
-    //        var otherParents = $ax('#' + id).getParents(true, ['item', 'repeater', 'dynamicPanel', 'layer'])[0];
-    //        for(var i = 0; i < otherParents.length; i++) {
-    //            parents.push(otherParents[i]);
-    //        }
-
-    //        for(var i = 0; i < parents.length; i++) {
-    //            var parentId = $ax.visibility.getWidgetFromContainer(parents[i]);
-    //            var parent = $ax.visibility.applyWidgetContainer(parentId, true);
-
-    //            // Layer may not have container, and will be at 0,0 otherwise.
-    //            if (!parent.length) continue;
-
-    //            fixed = _fixedOffset(parentId, vert);
-    //            if(fixed.valid) {
-    //                loc += fixed.offset;
-    //                break; // If fixed ignore any parents if there are any, they don't matter.
-    //            } else loc += $ax.getNumFromPx(parent.css(prop));
-    //        }
-    //    }
-
-    //    if (high) loc += obj[dim]();
-
-    //    // Special Layer code
-    //    if (axObj.type == 'layer') {
-    //        // If layer has a container, then use that. Otherwise must deal with children. Children can move in container after created, but ignoring for now.
-    //        var container = $ax.visibility.applyWidgetContainer(id, true, true);
-    //        if(container.length) loc += $ax.getNumFromPx(container.css(prop));
-    //        else loc += (_getChildLoc(axObj.objs, vert, high, dim, true, id) || 0);
-    //    }
-
-    //    if(displaySet) obj.css('display', oldDisplay);
-    //    return loc;
-    //};
-
-    //var _getChildLoc = function (children, vert, high, dim, root, path, itemId) {
-    //    if (typeof (path) == 'string') {
-    //        itemId = $ax.repeater.getItemIdFromElementId(path);
-    //        path = $ax.getPathFromScriptId(path);
-    //        path.pop(); // Remove object id, only want rdo path.
-    //    }
-    //    var mathFunc = high ? 'max' : 'min';
-    //    var childLoc = NaN;
-    //    for (var i = 0; i < children.length; i++) {
-    //        var childObj = children[i];
-    //        var childId = $ax.getElementIdFromPath([childObj.id], { relativeTo: path });
-    //        if (!childId) continue;
-    //        childId = $ax.repeater.createElementId(childId, itemId);
-    //        if($ax.public.fn.IsReferenceDiagramObject(childObj.type)) {
-    //            path.push(childObj.id);
-    //            var childProp = _getChildLoc($ax.pageData.masters[$obj(childId).masterId].diagram.objects, vert, high, dim, false, path, itemId);
-    //            path.pop();
-    //            if(isNaN(childProp)) continue;
-    //        } else if($ax.public.fn.IsLayer(childObj.type)) {
-    //            childProp = _getChildLoc(childObj.objs, vert, high, dim, false, path, itemId);
-    //        } else {
-    //            if(!$ax.visibility.IsIdVisible(childId)) continue;
-    //            childProp = $ax('#' + childId).locRelativeIgnoreLayer(vert);
-    //            if(high) childProp += $jobj(childId)[dim]();
-    //        }
-
-    //        if(isNaN(childLoc)) childLoc = childProp;
-    //        else if(!isNaN(childProp)) childLoc = Math[mathFunc](childLoc, childProp);
-    //    }
-
-    //    return root && isNaN(childLoc) ? 0 : childLoc;
-    //};
-
-    //var _fixedOffset = function (id, vert) {
-    //    var axObj = $obj(id);
-    //    //I think this is only for pinned panels? So why are we coming through here for rtps?
-    //    if(!axObj) return { valid: false };
-
-    //    var dim = vert ? 'height' : 'width';
-    //    var alignment = axObj['fixed' + (vert ? 'Vertical' : 'Horizontal')];
-    //    if(!alignment) return { valid: false };
-    //    var loc = 0;
-
-    //    // TODO: This returns 0 for width/height it or any parent is display none. Similar issue when using axquery width/height
-    //    // TODO:  Look into replacing this with axquery width/height and fixing that to use this hack. Potentially want to make js generic trapper.
-    //    var trap = _displayWidget(id);
-    //    var query = $jobj(id);
-    //    var objSize = query[dim]();
-    //    trap();
-
-    //    if(alignment == 'center' || alignment == 'middle') {
-    //        loc = $ax.getNumFromPx(query.css('margin-' + (vert ? 'top' : 'left')));
-    //        loc += ($(window)[dim]()) / 2;
-    //    } else if(alignment == 'bottom' || alignment == 'right') {
-    //        loc = $ax.getNumFromPx(query.css(vert ? 'bottom' : 'right'));
-    //        loc = $(window)[dim]() - objSize - loc; // subract loc because margin here moves farther left/up as it gets bigger.
-    //    } else {
-    //        loc = $ax.getNumFromPx(query.css(vert ? 'top' : 'left'));
-    //    }
-
-    //    var scrollKey = 'scroll' + (vert ? 'Top' : 'Left');
-    //    return { offset: $(window)[scrollKey]() + loc, valid: true, fullWidth: axObj.percentWidth == 1 };
-    //};
-
-    var _displayWidget = function(id) {
-        var parents = $ax('#' + id).getParents(true, '*')[0];
-        parents.push(id); // also need to show self
-
-        var displayed = [];
-        for(var i = 0; i < parents.length; i++) {
-            var currId = parents[i];
-            var currObj = $jobj(currId);
-            if(currObj.css('display') == 'none') {
-                currObj.css('display', 'block');
-                displayed.push(currId);
-            }
-        }
-
-        return function() {
-            for(var i = 0; i < displayed.length; i++) {
-                $jobj(displayed[i]).css('display', 'none');
-            }
-        };
-    }
 });

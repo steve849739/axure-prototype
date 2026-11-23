@@ -27,8 +27,12 @@
 	overflow: visible;
 }
 
+#pageNotesHeader {
+    padding: 20px 15px;
+}
+
 .pageNoteContainer {
-    padding: 0px 12px 8px 12px;
+    padding: 0px 15px 8px 15px;
 }
 
 .mobileMode .pageNoteContainer {
@@ -38,14 +42,14 @@
 .pageNoteName {
     font-size: 13px;
     font-weight: bold;
-    color: #2c2c2c;
+    /*color: #2c2c2c;*/
     margin: 15px 0px 5px 0px;
     white-space: nowrap;
 }
 
 .pageNote {
     font-size: 13px;
-    color: #2a2e38;
+    color: #081222;
     line-height: 1.67;
     word-wrap: break-word;
 }
@@ -76,10 +80,26 @@
 }
 
 .widgetNoteContainer {
-    padding: 12px;
-    border-bottom: 1px solid transparent;
-    border-top: 1px solid transparent;
+    padding: 15px;
+    border: 2px solid transparent;
+    margin-left: .5px;
+    border-radius: 4px;
     cursor: pointer;
+    color: #64748B;
+}
+
+.widgetNoteTitle {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.widgetNoteContainer:hover {
+    background-color: #f7f8fb;
+}
+
+.notesDialog .widgetNoteContainer:hover {
+    background-color: transparent;
 }
 
 .mobileMode .widgetNoteContainer {
@@ -88,8 +108,12 @@
 
 .widgetNoteContainerSelected {
     background-color: white;
-    border-bottom: 1px solid #c2c2c2;
-    border-top: 1px solid #c2c2c2;
+    border: 2px solid #2563eb;
+    color: #1E293B;
+}
+
+.widgetNoteContainerSelected:hover {
+    background-color: white;
 }
 
 .widgetNoteFootnote {
@@ -113,11 +137,10 @@ div.annnoteline {
 }
 
 .widgetNoteLabel {
-    font-size: 13px;
-    font-weight: 600;
-    color: #58167d;
+    font-size: 14px;
     margin-top: 4px;
-    float: right;
+    word-break: break-word;
+    text-align: right;
 }
 
 .noteLink {
@@ -130,11 +153,11 @@ div.annnoteline {
 }
 
 .notesSectionHeader {
-    margin: 0px 8px 0px 12px;
+    margin: 0px 15px 4px 15px;
 }
 
 .notesPageNameHeader {
-    margin: 8px 8px 15px 12px;
+    margin: 8px 15px 15px 15px;
 }
 
 .mobileMode .notesPageNameHeader {
@@ -176,7 +199,7 @@ div.resizeNotesDialog {
 div.notesDialog {
     position: absolute;
     padding: 16px 3px 10px 3px;
-    background-color: #efefef;
+    background-color: #FCFDFF;
     width: 300px;
     height: 300px;
     line-height: normal;

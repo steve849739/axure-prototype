@@ -9,7 +9,7 @@
 
         var widget = $jobj(id);
         var query = $ax('#' + id);
-        var isLayer = $ax.getTypeFromElementId(id) == $ax.constants.LAYER_TYPE;
+        var isLayer = $ax.public.fn.IsLayer($ax.getTypeFromElementId(id));
         if(!rootLayer) {
             rootLayer = _move.getRootLayer(id);
             if (rootLayer && !skipContainerForRootLayer) {
@@ -67,7 +67,7 @@
     };
 
     _move.getRootLayer = function (id) {
-        var isLayer = $ax.getTypeFromElementId(id) == $ax.constants.LAYER_TYPE;
+        var isLayer = $ax.public.fn.IsLayer($ax.getTypeFromElementId(id));
         var rootLayer = isLayer ? id : '';
 
         var parentIds = $ax('#' + id).getParents(true, '*')[0];
@@ -107,6 +107,16 @@
         }
     };
 
+    var _trapScrollLoc = function(obj) {
+        var objLoc = {
+            x: obj.scrollLeft,
+            y: obj.scrollTop
+        }
+        return function () {
+            obj.scroll(objLoc.x, objLoc.y);
+        };
+    }
+
     var _moveElement = function (id, options, animationCompleteCallback, shouldFire,  jobj, moveInfo){
         var cssStyles = {};
 
@@ -121,17 +131,36 @@
 
         var query = $addAll(jobj, id);
         var completeCount = query.length;
-        var completeAnimation = function() {
+        // use this hack to return the state scroll position to the original location because smthg unexpectedly sets it to(0,0). RP-2809
+        var parentPanelStates = $ax('#' + id).getParents(true, 'state');
+        var scrollPrevented = false;
+        var completeAnimation = function () {
+            // scroll hack, see above. RP-2809
+            var preventNextStateScroll = function () {
+                if(scrollPrevented || !parentPanelStates || !parentPanelStates.length) return;
+                var state = document.getElementById(parentPanelStates[0]);
+                if(!state) return;
+                var trapScroll = _trapScrollLoc(state);
+                var preventFunc = () => trapScroll();
+                state.addEventListener("scroll", preventFunc, { once: true });
+                scrollPrevented = true;
+            }
+
             completeCount--;
             if(completeCount == 0 && rootLayer) $ax.visibility.popContainer(rootLayer, false);
             if(animationCompleteCallback) animationCompleteCallback();
             if(shouldFire) $ax.action.fireAnimationFromQueue(id, $ax.action.queueTypes.move);
+            preventNextStateScroll();
         };
-        if(options.easing==='none') {
-            query.animate(cssStyles, { duration: 0, queue: false });
-
-            if(rootLayer) $ax.visibility.popContainer(rootLayer, false);
-            if(animationCompleteCallback) animationCompleteCallback();
+        if (options.easing === 'none') {
+            //if not having this requestAnimationFrame causes performance issues,
+            //add it back and move the above call to moveMovedLocation into it and the
+            //query.animate calls below
+            //window.requestAnimationFrame(function () {
+                query.css(cssStyles);
+                if (rootLayer) $ax.visibility.popContainer(rootLayer, false);
+                if (animationCompleteCallback) animationCompleteCallback();
+            //});
             //if this widget is inside a layer, we should just remove the layer from the queue
             if(shouldFire) $ax.action.fireAnimationFromQueue(id, $ax.action.queueTypes.move);
         } else if (options.trajectory === 'straight' || moveInfo.horzX === 0 || moveInfo.vertY === 0) {
